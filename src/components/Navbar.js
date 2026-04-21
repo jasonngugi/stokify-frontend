@@ -1,21 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 function Navbar({ onLogout }) {
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navLink = (to, label) => (
-    <Link to={to} style={{
-      color: location.pathname === to ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-      textDecoration: 'none',
-      fontSize: '14px',
-      fontFamily: '"DM Sans", sans-serif',
-      fontWeight: location.pathname === to ? '600' : '400',
-      letterSpacing: '0.5px',
-      padding: '6px 0',
-      borderBottom: location.pathname === to ? '2px solid #00f5a0' : '2px solid transparent',
-      transition: 'all 0.2s ease'
-    }}>
+    <Link
+      to={to}
+      onClick={() => setMenuOpen(false)}
+      style={{
+        color: location.pathname === to ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+        textDecoration: 'none',
+        fontSize: '15px',
+        fontFamily: '"DM Sans", sans-serif',
+        fontWeight: location.pathname === to ? '600' : '400',
+        padding: '12px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        display: 'block',
+      }}>
       {label}
     </Link>
   );
@@ -24,13 +27,13 @@ function Navbar({ onLogout }) {
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       <nav style={{
-        background: 'rgba(10, 10, 20, 0.95)',
+        background: 'rgba(10,10,20,0.95)',
         backdropFilter: 'blur(20px)',
-        padding: '0 40px',
+        padding: '0 20px',
         display: 'flex',
         alignItems: 'center',
-        gap: '40px',
-        height: '64px',
+        justifyContent: 'space-between',
+        height: '60px',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         position: 'sticky',
         top: 0,
@@ -42,33 +45,87 @@ function Navbar({ onLogout }) {
           fontWeight: '800',
           fontSize: '20px',
           letterSpacing: '-0.5px',
-          marginRight: '20px'
         }}>
           STOK<span style={{ color: '#00f5a0' }}>IFY</span>
         </span>
 
-        {navLink('/', 'Dashboard')}
-        {navLink('/products', 'Products')}
-        {navLink('/sales', 'Sales')}
+        {/* Desktop links */}
+        <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="desktop-nav">
+          {['/', '/products', '/sales'].map((path, i) => (
+            <Link key={path} to={path} style={{
+              color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontFamily: '"DM Sans", sans-serif',
+              fontWeight: location.pathname === path ? '600' : '400',
+              borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
+              padding: '6px 0',
+            }}>
+              {['Dashboard', 'Products', 'Sales'][i]}
+            </Link>
+          ))}
+          <button onClick={onLogout} style={{
+            background: 'transparent',
+            color: 'rgba(255,255,255,0.5)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            padding: '7px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: '13px',
+          }}>Logout</button>
+        </div>
 
-        <button onClick={onLogout} style={{
-          marginLeft: 'auto',
-          background: 'transparent',
-          color: 'rgba(255,255,255,0.5)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          padding: '8px 18px',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontFamily: '"DM Sans", sans-serif',
-          fontSize: '13px',
-          transition: 'all 0.2s ease'
-        }}
-          onMouseEnter={e => { e.target.style.borderColor = '#ff4d4d'; e.target.style.color = '#ff4d4d'; }}
-          onMouseLeave={e => { e.target.style.borderColor = 'rgba(255,255,255,0.15)'; e.target.style.color = 'rgba(255,255,255,0.5)'; }}
-        >
-          Logout
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'white',
+            fontSize: '22px',
+            cursor: 'pointer',
+            display: 'none',
+          }}
+          className="hamburger">
+          {menuOpen ? '✕' : '☰'}
         </button>
       </nav>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div style={{
+          background: 'rgba(10,10,20,0.98)',
+          padding: '8px 20px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          position: 'sticky',
+          top: '60px',
+          zIndex: 99,
+        }}>
+          {navLink('/', 'Dashboard')}
+          {navLink('/products', 'Products')}
+          {navLink('/sales', 'Sales')}
+          <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
+            background: 'transparent',
+            color: '#ff4d4d',
+            border: '1px solid rgba(255,77,77,0.3)',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: '14px',
+            width: '100%',
+            marginTop: '8px',
+          }}>Logout</button>
+        </div>
+      )}
+
+      <style>{`
+        @media (max-width: 600px) {
+          .desktop-nav { display: none !important; }
+          .hamburger { display: block !important; }
+        }
+      `}</style>
     </>
   );
 }
