@@ -41,129 +41,60 @@ function Products() {
     setLoading(false);
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px 16px',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px',
-    color: 'white',
-    fontSize: '14px',
-    fontFamily: '"DM Sans", sans-serif',
-    outline: 'none',
-    boxSizing: 'border-box',
-    transition: 'border-color 0.2s ease',
-  };
-
-  const labelStyle = {
-    display: 'block',
-    marginBottom: '8px',
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: '12px',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-  };
-
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-      <div style={{
-        minHeight: '100vh',
-        background: '#080810',
-        fontFamily: '"DM Sans", sans-serif',
-        padding: '40px',
-        color: 'white',
-      }}>
-        <div style={{ marginBottom: '40px' }}>
-          <h1 style={{
-            fontFamily: '"Syne", sans-serif',
-            fontWeight: '800',
-            fontSize: '32px',
-            color: 'white',
-            margin: '0 0 6px 0',
-            letterSpacing: '-1px',
-          }}>Add Product</h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>
-            Add a new item to your inventory
-          </p>
-        </div>
+      <style>{`
+        .products-page { min-height: 100vh; background: #080810; font-family: 'DM Sans', sans-serif; padding: 20px; color: white; }
+        .products-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: white; margin: 0 0 6px 0; letter-spacing: -1px; }
+        .products-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin: 0 0 24px 0; }
+        .form-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 24px; }
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+        .form-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; box-sizing: border-box; -webkit-appearance: none; }
+        .form-input:focus { border-color: rgba(0,245,160,0.4); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .submit-btn { width: 100%; padding: 14px; background: #00f5a0; color: #080810; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif; margin-top: 8px; }
+        .submit-btn:disabled { background: rgba(0,245,160,0.3); cursor: not-allowed; }
+        .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; }
+        .error-msg { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #ff4d4d; font-size: 14px; }
+        @media (min-width: 600px) {
+          .products-page { padding: 40px; }
+          .form-card { max-width: 520px; }
+        }
+      `}</style>
+      <div className="products-page">
+        <h1 className="products-title">Add Product</h1>
+        <p className="products-subtitle">Add a new item to your inventory</p>
 
-        <div style={{
-          maxWidth: '520px',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '20px',
-          padding: '36px',
-        }}>
-          {message && (
-            <div style={{
-              background: 'rgba(0,245,160,0.08)',
-              border: '1px solid rgba(0,245,160,0.2)',
-              borderRadius: '10px',
-              padding: '14px 16px',
-              marginBottom: '24px',
-              color: '#00f5a0',
-              fontSize: '14px',
-            }}>
-              ✓ {message}
-            </div>
-          )}
-
-          {error && (
-            <div style={{
-              background: 'rgba(255,77,77,0.08)',
-              border: '1px solid rgba(255,77,77,0.2)',
-              borderRadius: '10px',
-              padding: '14px 16px',
-              marginBottom: '24px',
-              color: '#ff4d4d',
-              fontSize: '14px',
-            }}>
-              ✕ {error}
-            </div>
-          )}
+        <div className="form-card">
+          {message && <div className="success-msg">✓ {message}</div>}
+          {error && <div className="error-msg">✕ {error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>Product Name</label>
-              <input name="name" value={form.name} onChange={handleChange} required
-                style={inputStyle} placeholder="e.g. Mineral Water 500ml" />
+            <div className="form-group">
+              <label className="form-label">Product Name</label>
+              <input className="form-input" name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Mineral Water 500ml" />
             </div>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>SKU <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-              <input name="sku" value={form.sku} onChange={handleChange}
-                style={inputStyle} placeholder="e.g. WAT001" />
+            <div className="form-group">
+              <label className="form-label">SKU <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+              <input className="form-input" name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WAT001" />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div>
-                <label style={labelStyle}>Quantity</label>
-                <input name="quantity" type="number" value={form.quantity} onChange={handleChange} required
-                  style={inputStyle} placeholder="0" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Quantity</label>
+                <input className="form-input" name="quantity" type="number" value={form.quantity} onChange={handleChange} required placeholder="0" />
               </div>
-              <div>
-                <label style={labelStyle}>Low Stock Threshold</label>
-                <input name="low_stock_threshold" type="number" value={form.low_stock_threshold} onChange={handleChange} required
-                  style={inputStyle} placeholder="10" />
+              <div className="form-group">
+                <label className="form-label">Low Stock Alert</label>
+                <input className="form-input" name="low_stock_threshold" type="number" value={form.low_stock_threshold} onChange={handleChange} required placeholder="10" />
               </div>
             </div>
-            <div style={{ marginBottom: '28px' }}>
-              <label style={labelStyle}>Price (KSh)</label>
-              <input name="price" type="number" value={form.price} onChange={handleChange} required
-                style={inputStyle} placeholder="0.00" />
+            <div className="form-group">
+              <label className="form-label">Price (KSh)</label>
+              <input className="form-input" name="price" type="number" value={form.price} onChange={handleChange} required placeholder="0.00" />
             </div>
-            <button type="submit" disabled={loading} style={{
-              width: '100%',
-              padding: '14px',
-              background: loading ? 'rgba(0,245,160,0.3)' : '#00f5a0',
-              color: '#080810',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '15px',
-              fontWeight: '600',
-              fontFamily: '"DM Sans", sans-serif',
-              transition: 'all 0.2s ease',
-            }}>
+            <button className="submit-btn" type="submit" disabled={loading}>
               {loading ? 'Adding...' : 'Add Product'}
             </button>
           </form>
