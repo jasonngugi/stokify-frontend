@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Sales from './pages/Sales';
+import SalesHistory from './pages/SalesHistory';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/sales" element={<Sales />} />
+            <Route path="/history" element={<SalesHistory />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </>

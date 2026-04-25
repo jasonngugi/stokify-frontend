@@ -51,7 +51,7 @@ function Navbar({ onLogout }) {
 
         {/* Desktop links */}
         <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales'].map((path, i) => (
+          {['/', '/products', '/sales', '/history'].map((path, i) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
@@ -61,7 +61,7 @@ function Navbar({ onLogout }) {
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
             }}>
-              {['Dashboard', 'Products', 'Sales'][i]}
+              {['Dashboard', 'Products', 'Sales', 'History'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
@@ -105,6 +105,7 @@ function Navbar({ onLogout }) {
           {navLink('/', 'Dashboard')}
           {navLink('/products', 'Products')}
           {navLink('/sales', 'Sales')}
+          {navLink('/history', 'History')}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
