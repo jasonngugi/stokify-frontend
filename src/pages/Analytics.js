@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const COLORS = ['#00f5a0', '#00d4ff', '#7c5cfc', '#ffc800', '#ff4d4d'];
 
 function Analytics() {
+    const { storeId } = useStore();
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (storeId) fetchData();
+  }, [storeId]);
 
   const fetchData = async () => {
     try {
       const [salesRes, productsRes] = await Promise.all([
-        axios.get(`${BACKEND_URL}/sales/${STORE_ID}`),
-        axios.get(`${BACKEND_URL}/products/${STORE_ID}`)
+        axios.get(`${BACKEND_URL}/sales/${storeId}`),
+        axios.get(`${BACKEND_URL}/products/${storeId}`)
       ]);
       setSales(salesRes.data.sales);
       setProducts(productsRes.data.products);

@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Dashboard() {
+  const { storeId } = useStore();
   const [products, setProducts] = useState([]);
   const [lowStock, setLowStock] = useState([]);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (storeId) fetchProducts();
+  }, [storeId]);
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/products/${STORE_ID}`);
+      const res = await axios.get(`${BACKEND_URL}/products/${storeId}`);
       const allProducts = res.data.products;
       setProducts(allProducts);
       setLowStock(allProducts.filter(p => p.quantity <= p.low_stock_threshold));

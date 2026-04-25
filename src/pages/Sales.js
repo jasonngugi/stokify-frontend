@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Sales() {
+  const { storeId } = useStore();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -13,12 +15,12 @@ function Sales() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (storeId) fetchProducts();
+  }, [storeId]);
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/products/${STORE_ID}`);
+      const res = await axios.get(`${BACKEND_URL}/products/${storeId}`);
       setProducts(res.data.products);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -35,7 +37,7 @@ function Sales() {
 
     try {
       await axios.post(`${BACKEND_URL}/sales`, {
-        store_id: STORE_ID,
+        store_id: storeId,
         items: [{ product_id: selectedProduct, quantity: parseInt(quantity), unit_price: product.price }]
       });
       setMessage(`✓ Sold ${quantity} × ${product.name} for KSh ${(product.price * quantity).toLocaleString()}`);

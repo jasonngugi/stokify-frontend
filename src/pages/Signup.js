@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Signup({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -22,9 +25,19 @@ function Signup({ onLogin }) {
     if (error) {
       setError(error.message);
       setLoading(false);
-    } else {
-      onLogin(data.user);
+      return;
     }
+
+    try {
+      await axios.post(`${BACKEND_URL}/stores`, {
+        name: storeName,
+        user_id: data.user.id
+      });
+    } catch (err) {
+      console.error('Error creating store:', err);
+    }
+
+    onLogin(data.user);
   };
 
   const inputStyle = {

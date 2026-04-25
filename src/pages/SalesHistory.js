@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function SalesHistory() {
+    const { storeId } = useStore();
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSales();
-  }, []);
+    if (storeId) fetchSales();
+  }, [storeId]);
 
   const fetchSales = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/sales/${STORE_ID}`);
+      const res = await axios.get(`${BACKEND_URL}/sales/${storeId}`);
       setSales(res.data.sales);
     } catch (err) {
       console.error('Error fetching sales:', err);

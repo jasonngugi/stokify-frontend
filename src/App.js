@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
+import { StoreProvider } from './storeContext';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Sales from './pages/Sales';
@@ -38,7 +39,7 @@ function App() {
   return (
     <Router>
       {user ? (
-        <>
+        <StoreProvider user={user}>
           <Navbar onLogout={handleLogout} />
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -49,7 +50,7 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
-        </>
+        </StoreProvider>
       ) : (
         <Routes>
           <Route path="/" element={<Login onLogin={setUser} />} />

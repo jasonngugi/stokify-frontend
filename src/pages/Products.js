@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Products() {
+  const { storeId } = useStore();
   const [form, setForm] = useState({
     name: '',
     sku: '',
@@ -19,12 +21,12 @@ function Products() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    if (storeId) fetchSuppliers();
+  }, [storeId]);
 
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/suppliers/${STORE_ID}`);
+      const res = await axios.get(`${BACKEND_URL}/suppliers/${storeId}`);
       setSuppliers(res.data.suppliers);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
@@ -43,7 +45,7 @@ function Products() {
     try {
       await axios.post(`${BACKEND_URL}/products`, {
         ...form,
-        store_id: STORE_ID,
+        store_id: storeId,
         quantity: parseInt(form.quantity),
         low_stock_threshold: parseInt(form.low_stock_threshold),
         price: parseFloat(form.price),

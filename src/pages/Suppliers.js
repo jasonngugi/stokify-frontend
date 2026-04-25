@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStore } from '../storeContext';
 
-const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Suppliers() {
@@ -12,12 +13,12 @@ function Suppliers() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    if (storeId) fetchSuppliers();
+  }, [storeId]);
 
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/suppliers/${STORE_ID}`);
+      const res = await axios.get(`${BACKEND_URL}/suppliers/${storeId}`);
       setSuppliers(res.data.suppliers);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
@@ -36,7 +37,7 @@ function Suppliers() {
     try {
       await axios.post(`${BACKEND_URL}/suppliers`, {
         ...form,
-        store_id: STORE_ID
+        store_id: storeId
       });
       setMessage('Supplier added successfully!');
       setForm({ name: '', contact_email: '', phone: '' });
