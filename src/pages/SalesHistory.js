@@ -56,8 +56,8 @@ function SalesHistory() {
         .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); }
         .empty { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); }
         @media (min-width: 600px) {
-          .history-page { padding: 40px; max-width: 700px; }
-        }
+  .history-page { padding: 40px; }
+}
       `}</style>
       <div className="history-page">
         <h1 className="history-title">Sales History</h1>
