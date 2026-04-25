@@ -61,7 +61,7 @@ function Navbar({ onLogout }) {
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
             }}>
-              {['D{['Dashboard', 'Products', 'Sales', 'History', 'Suppliers'][i]}
+             {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
