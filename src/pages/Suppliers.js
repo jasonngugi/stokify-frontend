@@ -6,6 +6,7 @@ import { useStore } from '../storeContext';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Suppliers() {
+    const { storeId } = useStore();
   const [suppliers, setSuppliers] = useState([]);
   const [form, setForm] = useState({ name: '', contact_email: '', phone: '' });
   const [message, setMessage] = useState('');
