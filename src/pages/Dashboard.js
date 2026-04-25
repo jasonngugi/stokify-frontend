@@ -94,7 +94,7 @@ function Dashboard() {
             <div key={p.id} className="product-card">
               <div>
                 <div className="product-name">{p.name}</div>
-                <div className="product-sku">{p.sku || '—'}</div>
+<div className="product-sku">{p.sku || '—'} {p.suppliers?.name ? `· ${p.suppliers.name}` : ''}</div>
               </div>
               <div className="product-right">
                 <div className="product-price">KSh {p.price}</div>

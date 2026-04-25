@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const STORE_ID = '36265ff8-1750-4f6f-8ec7-4c6925e77901';
@@ -10,11 +10,26 @@ function Products() {
     sku: '',
     quantity: '',
     low_stock_threshold: '',
-    price: ''
+    price: '',
+    supplier_id: ''
   });
+  const [suppliers, setSuppliers] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  const fetchSuppliers = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/suppliers/${STORE_ID}`);
+      setSuppliers(res.data.suppliers);
+    } catch (err) {
+      console.error('Error fetching suppliers:', err);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,10 +46,11 @@ function Products() {
         store_id: STORE_ID,
         quantity: parseInt(form.quantity),
         low_stock_threshold: parseInt(form.low_stock_threshold),
-        price: parseFloat(form.price)
+        price: parseFloat(form.price),
+        supplier_id: form.supplier_id || null
       });
       setMessage('Product added successfully!');
-      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', price: '' });
+      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', price: '', supplier_id: '' });
     } catch (err) {
       setError('Error adding product. Please try again.');
     }
@@ -79,6 +95,15 @@ function Products() {
             <div className="form-group">
               <label className="form-label">SKU <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
               <input className="form-input" name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WAT001" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Supplier <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+              <select className="form-input" name="supplier_id" value={form.supplier_id} onChange={handleChange}>
+                <option value="" style={{ background: '#080810' }}>— No supplier —</option>
+                {suppliers.map(s => (
+                  <option key={s.id} value={s.id} style={{ background: '#080810' }}>{s.name}</option>
+                ))}
+              </select>
             </div>
             <div className="form-row">
               <div className="form-group">
