@@ -52,6 +52,7 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/reorder" element={<Reorder />} />
           </Routes>
         </StoreProvider>
       ) : (
