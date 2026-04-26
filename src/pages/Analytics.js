@@ -6,13 +6,11 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
 const COLORS = ['#00f5a0', '#00d4ff', '#7c5cfc', '#ffc800', '#ff4d4d'];
 
 function Analytics() {
-    const { storeId } = useStore();
+  const { storeId } = useStore();
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +33,6 @@ function Analytics() {
     setLoading(false);
   };
 
-  // Sales by day (last 7 days)
   const getLast7DaysSales = () => {
     const days = [];
     for (let i = 6; i >= 0; i--) {
@@ -50,7 +47,6 @@ function Analytics() {
     return days;
   };
 
-  // Top 5 products by sales
   const getTopProducts = () => {
     const productTotals = {};
     sales.forEach(sale => {
@@ -65,7 +61,19 @@ function Analytics() {
       .slice(0, 5);
   };
 
-  // Stock levels for pie chart
+  const getProfitabilityData = () => {
+    return products
+      .filter(p => p.buying_price > 0)
+      .map(p => ({
+        name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
+        revenue: parseFloat(p.price),
+        cost: parseFloat(p.buying_price),
+        profit: parseFloat((p.price - p.buying_price).toFixed(2))
+      }))
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 5);
+  };
+
   const getStockData = () => {
     return products.slice(0, 5).map(p => ({
       name: p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name,
@@ -74,15 +82,20 @@ function Analytics() {
   };
 
   const totalRevenue = sales.reduce((sum, s) => sum + s.total_amount, 0);
-  const totalUnitsSold = sales.reduce((sum, s) => sum + s.sale_items?.reduce((a, i) => a + i.quantity, 0), 0);
+  const totalUnitsSold = sales.reduce((sum, s) => sum + (s.sale_items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
   const avgOrderValue = sales.length > 0 ? (totalRevenue / sales.length).toFixed(0) : 0;
+  const totalPotentialProfit = products.reduce((sum, p) => sum + (p.price - p.buying_price) * p.quantity, 0);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 14px' }}>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '0 0 4px 0' }}>{label}</p>
-          <p style={{ color: '#00f5a0', fontSize: '14px', fontWeight: '600', margin: 0 }}>KSh {payload[0].value.toLocaleString()}</p>
+          {payload.map((entry, i) => (
+            <p key={i} style={{ color: entry.color, fontSize: '13px', fontWeight: '600', margin: '2px 0' }}>
+              {entry.name}: KSh {entry.value.toLocaleString()}
+            </p>
+          ))}
         </div>
       );
     }
@@ -99,7 +112,7 @@ function Analytics() {
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
         .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; }
         .stat-label { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-        .stat-value { font-size: 22px; font-weight: 700; font-family: 'Syne', sans-serif; color: white; }
+        .stat-value { font-size: 20px; font-weight: 700; font-family: 'Syne', sans-serif; color: white; }
         .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .chart-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 20px; color: white; }
         .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); }
@@ -123,7 +136,7 @@ function Analytics() {
             <div className="stats-row">
               <div className="stat-card">
                 <div className="stat-label">Total Revenue</div>
-                <div className="stat-value" style={{ color: '#00f5a0', fontSize: '18px' }}>KSh {totalRevenue.toLocaleString()}</div>
+                <div className="stat-value" style={{ color: '#00f5a0' }}>KSh {totalRevenue.toLocaleString()}</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Total Sales</div>
@@ -135,7 +148,11 @@ function Analytics() {
               </div>
               <div className="stat-card">
                 <div className="stat-label">Avg Order</div>
-                <div className="stat-value" style={{ fontSize: '18px' }}>KSh {Number(avgOrderValue).toLocaleString()}</div>
+                <div className="stat-value">KSh {Number(avgOrderValue).toLocaleString()}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">Potential Profit</div>
+                <div className="stat-value" style={{ color: '#7c5cfc' }}>KSh {totalPotentialProfit.toLocaleString()}</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Products</div>
@@ -169,6 +186,23 @@ function Analytics() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {getProfitabilityData().length > 0 && (
+                <div className="chart-card">
+                  <div className="chart-title">Profit Margin by Product</div>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={getProfitabilityData()}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                      <XAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="revenue" name="Selling Price" fill="#00f5a0" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="cost" name="Buying Price" fill="#ff4d4d" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="profit" name="Profit" fill="#7c5cfc" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
               <div className="chart-card">
                 <div className="chart-title">Stock Distribution</div>

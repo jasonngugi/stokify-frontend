@@ -26,6 +26,7 @@ function Dashboard() {
 
   const totalItems = products.reduce((sum, p) => sum + p.quantity, 0);
   const totalValue = products.reduce((sum, p) => sum + p.quantity * p.price, 0);
+  const totalProfit = products.reduce((sum, p) => sum + (p.price - p.buying_price) * p.quantity, 0);
 
   return (
     <>
@@ -49,6 +50,7 @@ function Dashboard() {
         .product-sku { font-size: 12px; color: rgba(255,255,255,0.3); }
         .product-right { text-align: right; }
         .product-price { font-size: 14px; color: #00f5a0; margin-bottom: 4px; }
+        .product-profit { font-size: 11px; color: rgba(0,245,160,0.6); margin-bottom: 4px; }
         .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .in-stock { background: rgba(0,245,160,0.1); color: #00f5a0; }
         .low-stock { background: rgba(255,200,0,0.1); color: #ffc800; }
@@ -71,8 +73,12 @@ function Dashboard() {
             <div className="stat-value">{totalItems}</div>
           </div>
           <div className="stat-card">
-            <div className="stat-label">Value</div>
-            <div className="stat-value" style={{ color: '#00f5a0', fontSize: '20px' }}>KSh {totalValue.toLocaleString()}</div>
+            <div className="stat-label">Stock Value</div>
+            <div className="stat-value" style={{ color: '#00f5a0', fontSize: '18px' }}>KSh {totalValue.toLocaleString()}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label">Potential Profit</div>
+            <div className="stat-value" style={{ color: '#7c5cfc', fontSize: '18px' }}>KSh {totalProfit.toLocaleString()}</div>
           </div>
           <div className="stat-card" style={{ borderColor: lowStock.length > 0 ? 'rgba(255,200,0,0.3)' : 'rgba(255,255,255,0.08)' }}>
             <div className="stat-label">Low Stock</div>
@@ -95,10 +101,13 @@ function Dashboard() {
             <div key={p.id} className="product-card">
               <div>
                 <div className="product-name">{p.name}</div>
-<div className="product-sku">{p.sku || '—'} {p.suppliers?.name ? `· ${p.suppliers.name}` : ''}</div>
+                <div className="product-sku">{p.sku || '—'} {p.suppliers?.name ? `· ${p.suppliers.name}` : ''}</div>
               </div>
               <div className="product-right">
                 <div className="product-price">KSh {p.price}</div>
+                {p.buying_price > 0 && (
+                  <div className="product-profit">+KSh {(p.price - p.buying_price).toFixed(0)} margin</div>
+                )}
                 <span className={`stock-badge ${p.quantity <= p.low_stock_threshold ? 'low-stock' : 'in-stock'}`}>
                   {p.quantity} units
                 </span>

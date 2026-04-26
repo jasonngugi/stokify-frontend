@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStore } from '../storeContext';
 
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Products() {
@@ -12,6 +11,7 @@ function Products() {
     sku: '',
     quantity: '',
     low_stock_threshold: '',
+    buying_price: '',
     price: '',
     supplier_id: ''
   });
@@ -49,10 +49,11 @@ function Products() {
         quantity: parseInt(form.quantity),
         low_stock_threshold: parseInt(form.low_stock_threshold),
         price: parseFloat(form.price),
+        buying_price: parseFloat(form.buying_price) || 0,
         supplier_id: form.supplier_id || null
       });
       setMessage('Product added successfully!');
-      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', price: '', supplier_id: '' });
+      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', buying_price: '', price: '', supplier_id: '' });
     } catch (err) {
       setError('Error adding product. Please try again.');
     }
@@ -117,9 +118,15 @@ function Products() {
                 <input className="form-input" name="low_stock_threshold" type="number" value={form.low_stock_threshold} onChange={handleChange} required placeholder="10" />
               </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Price (KSh)</label>
-              <input className="form-input" name="price" type="number" value={form.price} onChange={handleChange} required placeholder="0.00" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Buying Price (KSh)</label>
+                <input className="form-input" name="buying_price" type="number" value={form.buying_price} onChange={handleChange} required placeholder="0.00" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Selling Price (KSh)</label>
+                <input className="form-input" name="price" type="number" value={form.price} onChange={handleChange} required placeholder="0.00" />
+              </div>
             </div>
             <button className="submit-btn" type="submit" disabled={loading}>
               {loading ? 'Adding...' : 'Add Product'}
