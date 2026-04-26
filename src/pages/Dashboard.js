@@ -28,6 +28,14 @@ function Dashboard() {
   const totalValue = products.reduce((sum, p) => sum + p.quantity * p.price, 0);
   const totalProfit = products.reduce((sum, p) => sum + (p.price - p.buying_price) * p.quantity, 0);
 
+  // Group products by category
+  const groupedProducts = products.reduce((groups, product) => {
+    const category = product.categories?.name || 'Uncategorised';
+    if (!groups[category]) groups[category] = [];
+    groups[category].push(product);
+    return groups;
+  }, {});
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -42,7 +50,10 @@ function Dashboard() {
         .alert-box { background: rgba(255,200,0,0.06); border: 1px solid rgba(255,200,0,0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
         .alert-title { color: #ffc800; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
         .alert-item { color: rgba(255,200,0,0.7); font-size: 13px; padding: 3px 0; }
-        .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 12px; color: white; }
+        .category-section { margin-bottom: 28px; }
+        .category-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .category-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: white; }
+        .category-count { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); font-size: 11px; padding: 3px 8px; border-radius: 20px; }
         .table-wrapper { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; overflow: hidden; }
         .product-card { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; }
         .product-card:last-child { border-bottom: none; }
@@ -95,26 +106,33 @@ function Dashboard() {
           </div>
         )}
 
-        <div className="section-title">All Products</div>
-        <div className="table-wrapper">
-          {products.map(p => (
-            <div key={p.id} className="product-card">
-              <div>
-                <div className="product-name">{p.name}</div>
-                <div className="product-sku">{p.sku || '—'} {p.suppliers?.name ? `· ${p.suppliers.name}` : ''}</div>
-              </div>
-              <div className="product-right">
-                <div className="product-price">KSh {p.price}</div>
-                {p.buying_price > 0 && (
-                  <div className="product-profit">+KSh {(p.price - p.buying_price).toFixed(0)} margin</div>
-                )}
-                <span className={`stock-badge ${p.quantity <= p.low_stock_threshold ? 'low-stock' : 'in-stock'}`}>
-                  {p.quantity} units
-                </span>
-              </div>
+        {Object.entries(groupedProducts).map(([category, items]) => (
+          <div key={category} className="category-section">
+            <div className="category-header">
+              <div className="category-title">{category}</div>
+              <div className="category-count">{items.length} products</div>
             </div>
-          ))}
-        </div>
+            <div className="table-wrapper">
+              {items.map(p => (
+                <div key={p.id} className="product-card">
+                  <div>
+                    <div className="product-name">{p.name}</div>
+                    <div className="product-sku">{p.sku || '—'} {p.suppliers?.name ? `· ${p.suppliers.name}` : ''}</div>
+                  </div>
+                  <div className="product-right">
+                    <div className="product-price">KSh {p.price}</div>
+                    {p.buying_price > 0 && (
+                      <div className="product-profit">+KSh {(p.price - p.buying_price).toFixed(0)} margin</div>
+                    )}
+                    <span className={`stock-badge ${p.quantity <= p.low_stock_threshold ? 'low-stock' : 'in-stock'}`}>
+                      {p.quantity} units
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </>
   );
