@@ -50,30 +50,30 @@ function Navbar({ onLogout }) {
         </span>
 
         {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder'].map((path, i) => (
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="desktop-nav">
+          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry'].map((path, i) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
-              fontSize: '12px',
+              fontSize: '11px',
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: location.pathname === path ? '600' : '400',
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
               whiteSpace: 'nowrap',
             }}>
-              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder'][i]}
+              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
             background: 'transparent',
             color: 'rgba(255,255,255,0.5)',
             border: '1px solid rgba(255,255,255,0.15)',
-            padding: '7px 16px',
+            padding: '7px 12px',
             borderRadius: '8px',
             cursor: 'pointer',
             fontFamily: '"DM Sans", sans-serif',
-            fontSize: '12px',
+            fontSize: '11px',
             whiteSpace: 'nowrap',
           }}>Logout</button>
         </div>
@@ -112,6 +112,7 @@ function Navbar({ onLogout }) {
           {navLink('/analytics', 'Analytics')}
           {navLink('/categories', 'Categories')}
           {navLink('/reorder', 'Reorder')}
+          {navLink('/expiry', 'Expiry')}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',

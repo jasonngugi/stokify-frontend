@@ -14,7 +14,8 @@ function Products() {
     buying_price: '',
     price: '',
     supplier_id: '',
-    category_id: ''
+    category_id: '',
+    expiry_date: ''
   });
   const [suppliers, setSuppliers] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -65,10 +66,11 @@ function Products() {
         price: parseFloat(form.price),
         buying_price: parseFloat(form.buying_price) || 0,
         supplier_id: form.supplier_id || null,
-        category_id: form.category_id || null
+        category_id: form.category_id || null,
+        expiry_date: form.expiry_date || null
       });
       setMessage('Product added successfully!');
-      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', buying_price: '', price: '', supplier_id: '', category_id: '' });
+      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', buying_price: '', price: '', supplier_id: '', category_id: '', expiry_date: '' });
     } catch (err) {
       setError('Error adding product. Please try again.');
     }
@@ -155,6 +157,10 @@ function Products() {
                 <label className="form-label">Selling Price (KSh)</label>
                 <input className="form-input" name="price" type="number" value={form.price} onChange={handleChange} required placeholder="0.00" />
               </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Expiry Date <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional, for perishables)</span></label>
+              <input className="form-input" name="expiry_date" type="date" value={form.expiry_date} onChange={handleChange} style={{ colorScheme: 'dark' }} />
             </div>
             <button className="submit-btn" type="submit" disabled={loading}>
               {loading ? 'Adding...' : 'Add Product'}
