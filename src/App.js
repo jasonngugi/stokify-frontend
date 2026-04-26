@@ -9,6 +9,7 @@ import SalesHistory from './pages/SalesHistory';
 import Suppliers from './pages/Suppliers';
 import Analytics from './pages/Analytics';
 import Categories from './pages/Categories';
+import Reorder from './pages/Reorder';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -58,6 +59,7 @@ function App() {
           <Route path="/" element={<Login onLogin={setUser} />} />
           <Route path="/signup" element={<Signup onLogin={setUser} />} />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/reorder" element={<Reorder />} />
         </Routes>
       )}
     </Router>
