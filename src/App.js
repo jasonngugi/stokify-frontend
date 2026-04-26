@@ -8,6 +8,7 @@ import Sales from './pages/Sales';
 import SalesHistory from './pages/SalesHistory';
 import Suppliers from './pages/Suppliers';
 import Analytics from './pages/Analytics';
+import Categories from './pages/Categories';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -48,6 +49,7 @@ function App() {
             <Route path="/history" element={<SalesHistory />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </StoreProvider>

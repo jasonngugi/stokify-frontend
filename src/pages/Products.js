@@ -13,15 +13,20 @@ function Products() {
     low_stock_threshold: '',
     buying_price: '',
     price: '',
-    supplier_id: ''
+    supplier_id: '',
+    category_id: ''
   });
   const [suppliers, setSuppliers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (storeId) fetchSuppliers();
+    if (storeId) {
+      fetchSuppliers();
+      fetchCategories();
+    }
   }, [storeId]);
 
   const fetchSuppliers = async () => {
@@ -30,6 +35,15 @@ function Products() {
       setSuppliers(res.data.suppliers);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/categories/${storeId}`);
+      setCategories(res.data.categories);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
     }
   };
 
@@ -50,10 +64,11 @@ function Products() {
         low_stock_threshold: parseInt(form.low_stock_threshold),
         price: parseFloat(form.price),
         buying_price: parseFloat(form.buying_price) || 0,
-        supplier_id: form.supplier_id || null
+        supplier_id: form.supplier_id || null,
+        category_id: form.category_id || null
       });
       setMessage('Product added successfully!');
-      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', buying_price: '', price: '', supplier_id: '' });
+      setForm({ name: '', sku: '', quantity: '', low_stock_threshold: '', buying_price: '', price: '', supplier_id: '', category_id: '' });
     } catch (err) {
       setError('Error adding product. Please try again.');
     }
@@ -77,6 +92,7 @@ function Products() {
         .submit-btn:disabled { background: rgba(0,245,160,0.3); cursor: not-allowed; }
         .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; }
         .error-msg { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #ff4d4d; font-size: 14px; }
+        .hint { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 6px; }
         @media (min-width: 600px) {
           .products-page { padding: 40px; }
           .form-card { max-width: 520px; }
@@ -99,14 +115,26 @@ function Products() {
               <label className="form-label">SKU <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
               <input className="form-input" name="sku" value={form.sku} onChange={handleChange} placeholder="e.g. WAT001" />
             </div>
-            <div className="form-group">
-              <label className="form-label">Supplier <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-              <select className="form-input" name="supplier_id" value={form.supplier_id} onChange={handleChange}>
-                <option value="" style={{ background: '#080810' }}>— No supplier —</option>
-                {suppliers.map(s => (
-                  <option key={s.id} value={s.id} style={{ background: '#080810' }}>{s.name}</option>
-                ))}
-              </select>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Category <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                <select className="form-input" name="category_id" value={form.category_id} onChange={handleChange}>
+                  <option value="" style={{ background: '#080810' }}>— No category —</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id} style={{ background: '#080810' }}>{c.name}</option>
+                  ))}
+                </select>
+                {categories.length === 0 && <div className="hint">Add categories first from the Categories page</div>}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Supplier <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                <select className="form-input" name="supplier_id" value={form.supplier_id} onChange={handleChange}>
+                  <option value="" style={{ background: '#080810' }}>— No supplier —</option>
+                  {suppliers.map(s => (
+                    <option key={s.id} value={s.id} style={{ background: '#080810' }}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="form-row">
               <div className="form-group">

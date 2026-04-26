@@ -50,18 +50,19 @@ function Navbar({ onLogout }) {
         </span>
 
         {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics'].map((path, i) => (
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }} className="desktop-nav">
+          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories'].map((path, i) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
-              fontSize: '14px',
+              fontSize: '13px',
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: location.pathname === path ? '600' : '400',
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
+              whiteSpace: 'nowrap',
             }}>
-             {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics'][i]}
+              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
@@ -73,6 +74,7 @@ function Navbar({ onLogout }) {
             cursor: 'pointer',
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '13px',
+            whiteSpace: 'nowrap',
           }}>Logout</button>
         </div>
 
@@ -108,6 +110,7 @@ function Navbar({ onLogout }) {
           {navLink('/history', 'History')}
           {navLink('/suppliers', 'Suppliers')}
           {navLink('/analytics', 'Analytics')}
+          {navLink('/categories', 'Categories')}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
