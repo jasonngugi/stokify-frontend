@@ -144,7 +144,7 @@ function Navbar({ onLogout }) {
             padding: '10px 16px',
             borderRadius: '8px',
             cursor: 'pointer',
-            fontFamily: '"DM Sans', sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: '14px',
             width: '100%',
             marginTop: '8px',
