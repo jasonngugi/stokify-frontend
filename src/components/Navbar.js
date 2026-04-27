@@ -49,9 +49,9 @@ function Navbar({ onLogout }) {
           STOK<span style={{ color: '#00f5a0' }}>IFY</span>
         </span>
 
-        {/* Desktop links */}
+        {/* Desktop links - hidden on mobile */}
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry'].map((path, i) => (
+          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry', '/slowmoving'].map((path, i) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
@@ -62,7 +62,7 @@ function Navbar({ onLogout }) {
               padding: '6px 0',
               whiteSpace: 'nowrap',
             }}>
-              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry'][i]}
+              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry', 'Slow Moving'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
@@ -113,6 +113,7 @@ function Navbar({ onLogout }) {
           {navLink('/categories', 'Categories')}
           {navLink('/reorder', 'Reorder')}
           {navLink('/expiry', 'Expiry')}
+          {navLink('/slowmoving', 'Slow Moving')}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
