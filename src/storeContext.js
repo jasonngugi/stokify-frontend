@@ -1,26 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const StoreContext = createContext();
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export function StoreProvider({ children, user }) {
   const [storeId, setStoreId] = useState(null);
-  const [storeName, setStoreName] = useState('');
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchStore();
+      fetchOrCreateStore();
     }
   }, [user]);
 
-  const fetchStore = async () => {
+  const fetchOrCreateStore = async () => {
     try {
       const res = await axios.get(`${BACKEND_URL}/stores/user/${user.id}`);
       setStoreId(res.data.store_id);
-      setStoreName(res.data.store?.name || '');
+      setRole(res.data.role);
     } catch (err) {
       console.error('Error fetching store:', err);
     }
@@ -28,7 +27,7 @@ export function StoreProvider({ children, user }) {
   };
 
   return (
-    <StoreContext.Provider value={{ storeId, storeName, loading }}>
+    <StoreContext.Provider value={{ storeId, role, loading }}>
       {children}
     </StoreContext.Provider>
   );

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useStore } from '../storeContext';
 
 function Navbar({ onLogout }) {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { role } = useStore();
+
+  const isOwner = role === 'owner';
 
   const navLink = (to, label) => (
     <Link
@@ -23,24 +27,28 @@ function Navbar({ onLogout }) {
     </Link>
   );
 
-  const pages = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/products', label: 'Products' },
-    { path: '/sales', label: 'Sales' },
-    { path: '/history', label: 'History' },
-    { path: '/daily', label: 'Daily' },
-    { path: '/reports', label: 'Reports' },
-    { path: '/expenses', label: 'Expenses' },
-    { path: '/cashflow', label: 'Cash Flow' },
-    { path: '/credit', label: 'Credit' },
-    { path: '/suppliers', label: 'Suppliers' },
-    { path: '/analytics', label: 'Analytics' },
-    { path: '/seasonal', label: 'Seasonal' },
-    { path: '/categories', label: 'Categories' },
-    { path: '/reorder', label: 'Reorder' },
-    { path: '/expiry', label: 'Expiry' },
-    { path: '/slowmoving', label: 'Slow Moving' },
+  const allPages = [
+    { path: '/', label: 'Dashboard', ownerOnly: false },
+    { path: '/products', label: 'Products', ownerOnly: false },
+    { path: '/sales', label: 'Sales', ownerOnly: false },
+    { path: '/history', label: 'History', ownerOnly: false },
+    { path: '/daily', label: 'Daily', ownerOnly: true },
+    { path: '/reports', label: 'Reports', ownerOnly: true },
+    { path: '/expenses', label: 'Expenses', ownerOnly: true },
+    { path: '/cashflow', label: 'Cash Flow', ownerOnly: true },
+    { path: '/credit', label: 'Credit', ownerOnly: true },
+    { path: '/suppliers', label: 'Suppliers', ownerOnly: true },
+    { path: '/analytics', label: 'Analytics', ownerOnly: true },
+    { path: '/seasonal', label: 'Seasonal', ownerOnly: true },
+    { path: '/categories', label: 'Categories', ownerOnly: true },
+    { path: '/reorder', label: 'Reorder', ownerOnly: false },
+    { path: '/expiry', label: 'Expiry', ownerOnly: false },
+    { path: '/slowmoving', label: 'Slow Moving', ownerOnly: false },
+    { path: '/staff', label: 'Staff', ownerOnly: true },
   ];
+
+  const pages = allPages.filter(p => !p.ownerOnly || isOwner);
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -136,7 +144,7 @@ function Navbar({ onLogout }) {
             padding: '10px 16px',
             borderRadius: '8px',
             cursor: 'pointer',
-            fontFamily: '"DM Sans", sans-serif',
+            fontFamily: '"DM Sans', sans-serif',
             fontSize: '14px',
             width: '100%',
             marginTop: '8px',
