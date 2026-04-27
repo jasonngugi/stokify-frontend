@@ -23,6 +23,21 @@ function Navbar({ onLogout }) {
     </Link>
   );
 
+  const pages = [
+    { path: '/', label: 'Dashboard' },
+    { path: '/products', label: 'Products' },
+    { path: '/sales', label: 'Sales' },
+    { path: '/history', label: 'History' },
+    { path: '/daily', label: 'Daily' },
+    { path: '/suppliers', label: 'Suppliers' },
+    { path: '/analytics', label: 'Analytics' },
+    { path: '/seasonal', label: 'Seasonal' },
+    { path: '/categories', label: 'Categories' },
+    { path: '/reorder', label: 'Reorder' },
+    { path: '/expiry', label: 'Expiry' },
+    { path: '/slowmoving', label: 'Slow Moving' },
+  ];
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -45,13 +60,15 @@ function Navbar({ onLogout }) {
           fontWeight: '800',
           fontSize: '20px',
           letterSpacing: '-0.5px',
+          marginRight: '16px',
+          flexShrink: 0,
         }}>
           STOK<span style={{ color: '#00f5a0' }}>IFY</span>
         </span>
 
         {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry', '/slowmoving', '/seasonal'].map((path, i) => (
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', overflowX: 'auto' }} className="desktop-nav">
+          {pages.map(({ path, label }) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
@@ -61,8 +78,9 @@ function Navbar({ onLogout }) {
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}>
-              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry', 'Slow Moving', 'Seasonal'][i]}
+              {label}
             </Link>
           ))}
           <button onClick={onLogout} style={{
@@ -75,6 +93,7 @@ function Navbar({ onLogout }) {
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '10px',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}>Logout</button>
         </div>
 
@@ -103,18 +122,10 @@ function Navbar({ onLogout }) {
           position: 'sticky',
           top: '60px',
           zIndex: 99,
+          maxHeight: '80vh',
+          overflowY: 'auto',
         }}>
-          {navLink('/', 'Dashboard')}
-          {navLink('/products', 'Products')}
-          {navLink('/sales', 'Sales')}
-          {navLink('/history', 'History')}
-          {navLink('/suppliers', 'Suppliers')}
-          {navLink('/analytics', 'Analytics')}
-          {navLink('/categories', 'Categories')}
-          {navLink('/reorder', 'Reorder')}
-          {navLink('/expiry', 'Expiry')}
-          {navLink('/slowmoving', 'Slow Moving')}
-          {navLink('/seasonal', 'Seasonal')}
+          {pages.map(({ path, label }) => navLink(path, label))}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
