@@ -12,6 +12,7 @@ import Categories from './pages/Categories';
 import Reorder from './pages/Reorder';
 import Expiry from './pages/Expiry';
 import SlowMoving from './pages/SlowMoving';
+import Seasonal from './pages/Seasonal';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -55,6 +56,7 @@ function App() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/expiry" element={<Expiry />} />
             <Route path="/slowmoving" element={<SlowMoving />} />
+            <Route path="/seasonal" element={<Seasonal />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

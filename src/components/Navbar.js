@@ -49,31 +49,31 @@ function Navbar({ onLogout }) {
           STOK<span style={{ color: '#00f5a0' }}>IFY</span>
         </span>
 
-        {/* Desktop links - hidden on mobile */}
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="desktop-nav">
-          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry', '/slowmoving'].map((path, i) => (
+        {/* Desktop links */}
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }} className="desktop-nav">
+          {['/', '/products', '/sales', '/history', '/suppliers', '/analytics', '/categories', '/reorder', '/expiry', '/slowmoving', '/seasonal'].map((path, i) => (
             <Link key={path} to={path} style={{
               color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
-              fontSize: '11px',
+              fontSize: '10px',
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: location.pathname === path ? '600' : '400',
               borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
               padding: '6px 0',
               whiteSpace: 'nowrap',
             }}>
-              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry', 'Slow Moving'][i]}
+              {['Dashboard', 'Products', 'Sales', 'History', 'Suppliers', 'Analytics', 'Categories', 'Reorder', 'Expiry', 'Slow Moving', 'Seasonal'][i]}
             </Link>
           ))}
           <button onClick={onLogout} style={{
             background: 'transparent',
             color: 'rgba(255,255,255,0.5)',
             border: '1px solid rgba(255,255,255,0.15)',
-            padding: '7px 12px',
+            padding: '6px 10px',
             borderRadius: '8px',
             cursor: 'pointer',
             fontFamily: '"DM Sans", sans-serif',
-            fontSize: '11px',
+            fontSize: '10px',
             whiteSpace: 'nowrap',
           }}>Logout</button>
         </div>
@@ -114,6 +114,7 @@ function Navbar({ onLogout }) {
           {navLink('/reorder', 'Reorder')}
           {navLink('/expiry', 'Expiry')}
           {navLink('/slowmoving', 'Slow Moving')}
+          {navLink('/seasonal', 'Seasonal')}
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
