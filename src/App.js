@@ -14,6 +14,7 @@ import Expiry from './pages/Expiry';
 import SlowMoving from './pages/SlowMoving';
 import Seasonal from './pages/Seasonal';
 import DailySummary from './pages/DailySummary';
+import Reports from './pages/Reports';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -59,6 +60,7 @@ function App() {
             <Route path="/slowmoving" element={<SlowMoving />} />
             <Route path="/seasonal" element={<Seasonal />} />
             <Route path="/daily" element={<DailySummary />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

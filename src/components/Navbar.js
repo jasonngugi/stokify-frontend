@@ -29,6 +29,7 @@ function Navbar({ onLogout }) {
     { path: '/sales', label: 'Sales' },
     { path: '/history', label: 'History' },
     { path: '/daily', label: 'Daily' },
+    { path: '/reports', label: 'Reports' },
     { path: '/suppliers', label: 'Suppliers' },
     { path: '/analytics', label: 'Analytics' },
     { path: '/seasonal', label: 'Seasonal' },
@@ -37,7 +38,6 @@ function Navbar({ onLogout }) {
     { path: '/expiry', label: 'Expiry' },
     { path: '/slowmoving', label: 'Slow Moving' },
   ];
-
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
