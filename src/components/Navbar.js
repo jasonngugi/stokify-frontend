@@ -31,6 +31,7 @@ function Navbar({ onLogout }) {
     { path: '/daily', label: 'Daily' },
     { path: '/reports', label: 'Reports' },
     { path: '/expenses', label: 'Expenses' },
+    { path: '/cashflow', label: 'Cash Flow' },
     { path: '/suppliers', label: 'Suppliers' },
     { path: '/analytics', label: 'Analytics' },
     { path: '/seasonal', label: 'Seasonal' },
