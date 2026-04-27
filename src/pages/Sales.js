@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useStore } from '../storeContext';
 
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Sales() {
@@ -10,6 +9,7 @@ function Sales() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,17 +38,39 @@ function Sales() {
     try {
       await axios.post(`${BACKEND_URL}/sales`, {
         store_id: storeId,
+        payment_method: paymentMethod,
         items: [{ product_id: selectedProduct, quantity: parseInt(quantity), unit_price: product.price }]
       });
-      setMessage(`✓ Sold ${quantity} × ${product.name} for KSh ${(product.price * quantity).toLocaleString()}`);
+      setMessage(`✓ Sold ${quantity} × ${product.name} for KSh ${(product.price * quantity).toLocaleString()} via ${paymentMethod}`);
       setSelectedProduct('');
       setQuantity('');
+      setPaymentMethod('cash');
       fetchProducts();
     } catch (err) {
-      setError('Error recording sale. Please try again.');
+      setError(err.response?.data?.error || 'Error recording sale. Please try again.');
     }
     setLoading(false);
   };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    color: 'white',
+    fontSize: '15px',
+    fontFamily: '"DM Sans", sans-serif',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const paymentMethods = [
+    { value: 'cash', label: '💵 Cash', color: '#00f5a0' },
+    { value: 'mpesa', label: '📱 M-Pesa', color: '#00a651' },
+    { value: 'credit', label: '📋 Credit', color: '#ffc800' },
+    { value: 'bank', label: '🏦 Bank Transfer', color: '#00d4ff' },
+  ];
 
   return (
     <>
@@ -60,8 +82,9 @@ function Sales() {
         .form-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
         .form-group { margin-bottom: 18px; }
         .form-label { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
-        .form-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; box-sizing: border-box; -webkit-appearance: none; }
-        .form-input:focus { border-color: rgba(0,245,160,0.4); }
+        .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+        .payment-btn { padding: 12px; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); transition: all 0.2s; text-align: center; }
+        .payment-btn-active { border-color: rgba(0,245,160,0.4); background: rgba(0,245,160,0.08); color: white; }
         .submit-btn { width: 100%; padding: 14px; background: #00f5a0; color: #080810; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif; margin-top: 8px; }
         .submit-btn:disabled { background: rgba(0,245,160,0.3); cursor: not-allowed; }
         .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; }
@@ -79,6 +102,7 @@ function Sales() {
         @media (min-width: 600px) {
           .sales-page { padding: 40px; }
           .sales-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+          .payment-grid { grid-template-columns: repeat(4, 1fr); }
         }
       `}</style>
       <div className="sales-page">
@@ -93,7 +117,7 @@ function Sales() {
             <form onSubmit={handleSale}>
               <div className="form-group">
                 <label className="form-label">Select Product</label>
-                <select className="form-input" value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} required>
+                <select value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} required style={inputStyle}>
                   <option value="" style={{ background: '#080810' }}>— Choose a product —</option>
                   {products.map(p => (
                     <option key={p.id} value={p.id} style={{ background: '#080810' }}>
@@ -104,7 +128,19 @@ function Sales() {
               </div>
               <div className="form-group">
                 <label className="form-label">Quantity Sold</label>
-                <input className="form-input" type="number" value={quantity} onChange={e => setQuantity(e.target.value)} required placeholder="0" min="1" />
+                <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} required style={inputStyle} placeholder="0" min="1" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Payment Method</label>
+                <div className="payment-grid">
+                  {paymentMethods.map(m => (
+                    <button key={m.value} type="button"
+                      className={`payment-btn ${paymentMethod === m.value ? 'payment-btn-active' : ''}`}
+                      onClick={() => setPaymentMethod(m.value)}>
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <button className="submit-btn" type="submit" disabled={loading}>
                 {loading ? 'Recording...' : 'Record Sale'}
