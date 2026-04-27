@@ -7,15 +7,20 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Sales() {
   const { storeId } = useStore();
   const [products, setProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [selectedCustomer, setSelectedCustomer] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (storeId) fetchProducts();
+    if (storeId) {
+      fetchProducts();
+      fetchCustomers();
+    }
   }, [storeId]);
 
   const fetchProducts = async () => {
@@ -24,6 +29,15 @@ function Sales() {
       setProducts(res.data.products);
     } catch (err) {
       console.error('Error fetching products:', err);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/customers/${storeId}`);
+      setCustomers(res.data.customers);
+    } catch (err) {
+      console.error('Error fetching customers:', err);
     }
   };
 
@@ -39,12 +53,14 @@ function Sales() {
       await axios.post(`${BACKEND_URL}/sales`, {
         store_id: storeId,
         payment_method: paymentMethod,
+        customer_id: selectedCustomer || null,
         items: [{ product_id: selectedProduct, quantity: parseInt(quantity), unit_price: product.price }]
       });
       setMessage(`✓ Sold ${quantity} × ${product.name} for KSh ${(product.price * quantity).toLocaleString()} via ${paymentMethod}`);
       setSelectedProduct('');
       setQuantity('');
       setPaymentMethod('cash');
+      setSelectedCustomer('');
       fetchProducts();
     } catch (err) {
       setError(err.response?.data?.error || 'Error recording sale. Please try again.');
@@ -66,10 +82,10 @@ function Sales() {
   };
 
   const paymentMethods = [
-    { value: 'cash', label: '💵 Cash', color: '#00f5a0' },
-    { value: 'mpesa', label: '📱 M-Pesa', color: '#00a651' },
-    { value: 'credit', label: '📋 Credit', color: '#ffc800' },
-    { value: 'bank', label: '🏦 Bank Transfer', color: '#00d4ff' },
+    { value: 'cash', label: '💵 Cash' },
+    { value: 'mpesa', label: '📱 M-Pesa' },
+    { value: 'credit', label: '📋 Credit' },
+    { value: 'bank', label: '🏦 Bank Transfer' },
   ];
 
   return (
@@ -89,6 +105,7 @@ function Sales() {
         .submit-btn:disabled { background: rgba(0,245,160,0.3); cursor: not-allowed; }
         .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; }
         .error-msg { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #ff4d4d; font-size: 14px; }
+        .credit-hint { background: rgba(255,200,0,0.06); border: 1px solid rgba(255,200,0,0.2); border-radius: 10px; padding: 12px 14px; margin-top: 12px; color: #ffc800; font-size: 13px; }
         .stock-section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 12px; color: white; }
         .stock-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; }
         .stock-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; }
@@ -142,6 +159,20 @@ function Sales() {
                   ))}
                 </div>
               </div>
+
+              {paymentMethod === 'credit' && (
+                <div className="form-group">
+                  <label className="form-label">Customer <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <select value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} style={inputStyle}>
+                    <option value="" style={{ background: '#080810' }}>— Select customer —</option>
+                    {customers.map(c => (
+                      <option key={c.id} value={c.id} style={{ background: '#080810' }}>{c.name} {c.phone ? `· ${c.phone}` : ''}</option>
+                    ))}
+                  </select>
+                  <div className="credit-hint">⚠ This sale will be recorded as unpaid credit</div>
+                </div>
+              )}
+
               <button className="submit-btn" type="submit" disabled={loading}>
                 {loading ? 'Recording...' : 'Record Sale'}
               </button>

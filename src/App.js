@@ -17,6 +17,7 @@ import DailySummary from './pages/DailySummary';
 import Reports from './pages/Reports';
 import Expenses from './pages/Expenses';
 import CashFlow from './pages/CashFlow';
+import Credit from './pages/Credit';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -65,6 +66,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/cashflow" element={<CashFlow />} />
+            <Route path="/credit" element={<Credit />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>
