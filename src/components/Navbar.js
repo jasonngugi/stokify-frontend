@@ -30,6 +30,7 @@ function Navbar({ onLogout }) {
     { path: '/history', label: 'History' },
     { path: '/daily', label: 'Daily' },
     { path: '/reports', label: 'Reports' },
+    { path: '/expenses', label: 'Expenses' },
     { path: '/suppliers', label: 'Suppliers' },
     { path: '/analytics', label: 'Analytics' },
     { path: '/seasonal', label: 'Seasonal' },
