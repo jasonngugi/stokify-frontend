@@ -34,26 +34,30 @@ function Staff() {
     setMessage('');
     setError('');
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Sign up the staff member
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
-        password: Math.random().toString(36).slice(-8),
+        password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8),
         options: { data: { store_id: storeId, role: 'staff' } }
       });
-      if (error) throw error;
+      if (signUpError) throw signUpError;
 
-      await axios.post(`${BACKEND_URL}/stores`, {
-        name: 'Staff Account',
-        user_id: data.user.id,
-        store_id: storeId,
-        role: 'staff',
-        email
-      });
+      // Link them to the store with staff role
+      await supabase
+        .from('users')
+        .insert([{
+          id: data.user.id,
+          store_id: storeId,
+          name: email.split('@')[0],
+          email: email,
+          role: 'staff'
+        }]);
 
-      setMessage(`Invite sent to ${email}! They can sign in and will be linked to your store.`);
+      setMessage(`✓ ${email} has been added as staff! They need to check their email to confirm their account, then they can sign in at your app URL.`);
       setEmail('');
       fetchStaff();
     } catch (err) {
-      setError(err.message || 'Error inviting staff member.');
+      setError(err.message || 'Error adding staff member. They may already have an account.');
     }
     setInviteLoading(false);
   };
@@ -95,10 +99,10 @@ function Staff() {
         .form-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; box-sizing: border-box; }
         .submit-btn { width: 100%; padding: 14px; background: #00f5a0; color: #080810; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
         .submit-btn:disabled { background: rgba(0,245,160,0.3); cursor: not-allowed; }
-        .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; }
+        .success-msg { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #00f5a0; font-size: 14px; line-height: 1.5; }
         .error-msg { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: #ff4d4d; font-size: 14px; }
+        .info-box { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.15); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; color: rgba(0,212,255,0.8); font-size: 13px; line-height: 1.6; }
         .staff-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .staff-info { }
         .staff-name { font-size: 15px; color: white; font-weight: 600; margin-bottom: 4px; }
         .staff-email { font-size: 12px; color: rgba(255,255,255,0.4); }
         .staff-actions { display: flex; align-items: center; gap: 10px; }
@@ -126,8 +130,14 @@ function Staff() {
           <div>
             <div className="form-card">
               <div style={{ fontFamily: '"Syne", sans-serif', fontWeight: '700', fontSize: '16px', marginBottom: '16px', color: 'white' }}>Add Staff Member</div>
-              {message && <div className="success-msg">✓ {message}</div>}
+              
+              <div className="info-box">
+                ℹ️ Enter the staff member's email. They will receive a confirmation email and then can sign in at your app URL. They will automatically have staff-level access to your store.
+              </div>
+
+              {message && <div className="success-msg">{message}</div>}
               {error && <div className="error-msg">✕ {error}</div>}
+
               <form onSubmit={inviteStaff}>
                 <div className="form-group">
                   <label className="form-label">Staff Email</label>
@@ -171,7 +181,7 @@ function Staff() {
               const roleStyle = getRoleColor(member.role);
               return (
                 <div key={member.id} className="staff-card">
-                  <div className="staff-info">
+                  <div>
                     <div className="staff-name">{member.name || 'Staff Member'}</div>
                     <div className="staff-email">{member.email}</div>
                   </div>
