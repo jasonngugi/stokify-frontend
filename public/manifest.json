@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "STOKIFY",
+  "name": "STOKIFY - Inventory Management",
+  "description": "Smart inventory management for modern shops",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,37 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#00f5a0",
+  "background_color": "#080810",
+  "orientation": "portrait",
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "description": "View your inventory dashboard"
+    },
+    {
+      "name": "Record Sale",
+      "url": "/sales",
+      "description": "Record a new sale"
+    },
+    {
+      "name": "Add Product",
+      "url": "/products",
+      "description": "Add a new product"
+    }
+  ]
 }
