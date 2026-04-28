@@ -1,54 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../storeContext';
 
 function Navbar({ onLogout }) {
   const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
   const { role } = useStore();
-
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const dropdownRef = useRef(null);
   const isOwner = role === 'owner';
 
-  const navLink = (to, label) => (
-    <Link
-      to={to}
-      onClick={() => setMenuOpen(false)}
-      style={{
-        color: location.pathname === to ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-        textDecoration: 'none',
-        fontSize: '15px',
-        fontFamily: '"DM Sans", sans-serif',
-        fontWeight: location.pathname === to ? '600' : '400',
-        padding: '12px 0',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        display: 'block',
-      }}>
-      {label}
-    </Link>
-  );
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const allPages = [
-    { path: '/', label: 'Dashboard', ownerOnly: false },
-    { path: '/products', label: 'Products', ownerOnly: false },
-    { path: '/sales', label: 'Sales', ownerOnly: false },
-    { path: '/history', label: 'History', ownerOnly: false },
-    { path: '/daily', label: 'Daily', ownerOnly: true },
-    { path: '/reports', label: 'Reports', ownerOnly: true },
-    { path: '/expenses', label: 'Expenses', ownerOnly: true },
-    { path: '/cashflow', label: 'Cash Flow', ownerOnly: true },
-    { path: '/credit', label: 'Credit', ownerOnly: true },
-    { path: '/suppliers', label: 'Suppliers', ownerOnly: true },
-    { path: '/analytics', label: 'Analytics', ownerOnly: true },
-    { path: '/seasonal', label: 'Seasonal', ownerOnly: true },
-    { path: '/categories', label: 'Categories', ownerOnly: true },
-    { path: '/reorder', label: 'Reorder', ownerOnly: false },
-    { path: '/expiry', label: 'Expiry', ownerOnly: false },
-    { path: '/slowmoving', label: 'Slow Moving', ownerOnly: false },
-    { path: '/staff', label: 'Staff', ownerOnly: true },
-    { path: '/ai', label: '🤖 AI Advisor', ownerOnly: true },
+  const navGroups = [
+    {
+      label: '📦 Inventory',
+      ownerOnly: false,
+      items: [
+        { path: '/products', label: 'Products' },
+        { path: '/categories', label: 'Categories', ownerOnly: true },
+        { path: '/reorder', label: 'Reorder' },
+        { path: '/expiry', label: 'Expiry' },
+        { path: '/slowmoving', label: 'Slow Moving' },
+      ]
+    },
+    {
+      label: '💰 Finance',
+      ownerOnly: true,
+      items: [
+        { path: '/sales', label: 'Sales' },
+        { path: '/history', label: 'History' },
+        { path: '/credit', label: 'Credit & Debt' },
+        { path: '/expenses', label: 'Expenses' },
+        { path: '/cashflow', label: 'Cash Flow' },
+      ]
+    },
+    {
+      label: '📊 Insights',
+      ownerOnly: true,
+      items: [
+        { path: '/analytics', label: 'Analytics' },
+        { path: '/daily', label: 'Daily Summary' },
+        { path: '/reports', label: 'Reports' },
+        { path: '/seasonal', label: 'Seasonal Trends' },
+      ]
+    },
+    {
+      label: '⚙️ Settings',
+      ownerOnly: true,
+      items: [
+        { path: '/suppliers', label: 'Suppliers' },
+        { path: '/staff', label: 'Staff' },
+      ]
+    },
   ];
 
-  const pages = allPages.filter(p => !p.ownerOnly || isOwner);
+  const isGroupActive = (group) => group.items.some(item => location.pathname === item.path);
+
+  const mobileNavLink = (to, label) => (
+    <Link key={to} to={to} onClick={() => setMenuOpen(false)} style={{
+      color: location.pathname === to ? '#00f5a0' : 'rgba(255,255,255,0.7)',
+      textDecoration: 'none',
+      fontSize: '14px',
+      fontFamily: '"DM Sans", sans-serif',
+      fontWeight: location.pathname === to ? '600' : '400',
+      padding: '10px 12px',
+      display: 'block',
+      borderRadius: '8px',
+      background: location.pathname === to ? 'rgba(0,245,160,0.08)' : 'transparent',
+    }}>{label}</Link>
+  );
 
   return (
     <>
@@ -65,62 +94,153 @@ function Navbar({ onLogout }) {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-      }}>
-        <span style={{
-          color: 'white',
-          fontFamily: '"Syne", sans-serif',
-          fontWeight: '800',
-          fontSize: '20px',
-          letterSpacing: '-0.5px',
-          marginRight: '16px',
-          flexShrink: 0,
-        }}>
-          STOK<span style={{ color: '#00f5a0' }}>IFY</span>
-        </span>
+      }} ref={dropdownRef}>
 
-        {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', overflowX: 'auto' }} className="desktop-nav">
-          {pages.map(({ path, label }) => (
-            <Link key={path} to={path} style={{
-              color: location.pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
+          <span style={{
+            color: 'white',
+            fontFamily: '"Syne", sans-serif',
+            fontWeight: '800',
+            fontSize: '20px',
+            letterSpacing: '-0.5px',
+          }}>
+            STOK<span style={{ color: '#00f5a0' }}>IFY</span>
+          </span>
+        </Link>
+
+        {/* Desktop Nav */}
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }} className="desktop-nav">
+
+          {/* Dashboard */}
+          <Link to="/" style={{
+            color: location.pathname === '/' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            fontFamily: '"DM Sans", sans-serif',
+            fontWeight: location.pathname === '/' ? '600' : '400',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            background: location.pathname === '/' ? 'rgba(0,245,160,0.08)' : 'transparent',
+            whiteSpace: 'nowrap',
+          }}>Dashboard</Link>
+
+          {/* Sales link for staff */}
+          {!isOwner && (
+            <Link to="/sales" style={{
+              color: location.pathname === '/sales' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
               textDecoration: 'none',
-              fontSize: '10px',
+              fontSize: '13px',
               fontFamily: '"DM Sans", sans-serif',
-              fontWeight: location.pathname === path ? '600' : '400',
-              borderBottom: location.pathname === path ? '2px solid #00f5a0' : '2px solid transparent',
-              padding: '6px 0',
+              padding: '6px 12px',
+              borderRadius: '8px',
               whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}>
-              {label}
-            </Link>
+            }}>Sales</Link>
+          )}
+
+          {/* Dropdown groups */}
+          {navGroups.filter(g => !g.ownerOnly || isOwner).map((group) => (
+            <div key={group.label} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setActiveDropdown(activeDropdown === group.label ? null : group.label)}
+                style={{
+                  background: isGroupActive(group) ? 'rgba(0,245,160,0.08)' : 'transparent',
+                  border: 'none',
+                  color: isGroupActive(group) ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+                  fontSize: '13px',
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: isGroupActive(group) ? '600' : '400',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  whiteSpace: 'nowrap',
+                }}>
+                {group.label}
+                <span style={{ fontSize: '10px', opacity: 0.6 }}>▾</span>
+              </button>
+
+              {activeDropdown === group.label && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  background: 'rgba(10,10,20,0.98)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  padding: '8px',
+                  minWidth: '180px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  zIndex: 200,
+                  marginTop: '4px',
+                }}>
+                  {group.items
+                    .filter(item => !item.ownerOnly || isOwner)
+                    .map(item => (
+                      <Link key={item.path} to={item.path}
+                        onClick={() => setActiveDropdown(null)}
+                        style={{
+                          display: 'block',
+                          padding: '10px 14px',
+                          color: location.pathname === item.path ? '#00f5a0' : 'rgba(255,255,255,0.7)',
+                          textDecoration: 'none',
+                          fontSize: '13px',
+                          fontFamily: '"DM Sans", sans-serif',
+                          fontWeight: location.pathname === item.path ? '600' : '400',
+                          borderRadius: '8px',
+                          background: location.pathname === item.path ? 'rgba(0,245,160,0.08)' : 'transparent',
+                          whiteSpace: 'nowrap',
+                        }}>
+                        {item.label}
+                      </Link>
+                    ))}
+                </div>
+              )}
+            </div>
           ))}
+
+          {/* AI Advisor */}
+          {isOwner && (
+            <Link to="/ai" style={{
+              color: location.pathname === '/ai' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontFamily: '"DM Sans", sans-serif',
+              fontWeight: location.pathname === '/ai' ? '600' : '400',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              background: location.pathname === '/ai' ? 'rgba(0,245,160,0.08)' : 'rgba(0,245,160,0.05)',
+              border: '1px solid rgba(0,245,160,0.15)',
+              whiteSpace: 'nowrap',
+            }}>🤖 AI Advisor</Link>
+          )}
+
+          {/* Logout */}
           <button onClick={onLogout} style={{
             background: 'transparent',
             color: 'rgba(255,255,255,0.5)',
             border: '1px solid rgba(255,255,255,0.15)',
-            padding: '6px 10px',
+            padding: '6px 12px',
             borderRadius: '8px',
             cursor: 'pointer',
             fontFamily: '"DM Sans", sans-serif',
-            fontSize: '10px',
+            fontSize: '13px',
             whiteSpace: 'nowrap',
-            flexShrink: 0,
+            marginLeft: '4px',
           }}>Logout</button>
         </div>
 
         {/* Mobile hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontSize: '22px',
-            cursor: 'pointer',
-            display: 'none',
-          }}
-          className="hamburger">
+        <button onClick={() => setMenuOpen(!menuOpen)} style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'white',
+          fontSize: '22px',
+          cursor: 'pointer',
+          display: 'none',
+        }} className="hamburger">
           {menuOpen ? '✕' : '☰'}
         </button>
       </nav>
@@ -129,7 +249,7 @@ function Navbar({ onLogout }) {
       {menuOpen && (
         <div style={{
           background: 'rgba(10,10,20,0.98)',
-          padding: '8px 20px 16px',
+          padding: '12px 16px 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           position: 'sticky',
           top: '60px',
@@ -137,7 +257,39 @@ function Navbar({ onLogout }) {
           maxHeight: '80vh',
           overflowY: 'auto',
         }}>
-          {pages.map(({ path, label }) => navLink(path, label))}
+          {mobileNavLink('/', 'Dashboard')}
+          {!isOwner && mobileNavLink('/sales', 'Sales')}
+          {!isOwner && mobileNavLink('/reorder', 'Reorder')}
+          {!isOwner && mobileNavLink('/expiry', 'Expiry')}
+
+          {isOwner && navGroups.map(group => (
+            <div key={group.label}>
+              <div style={{
+                color: 'rgba(255,255,255,0.3)',
+                fontSize: '11px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                padding: '12px 12px 6px',
+                fontFamily: '"DM Sans", sans-serif',
+              }}>{group.label}</div>
+              {group.items.map(item => mobileNavLink(item.path, item.label))}
+            </div>
+          ))}
+
+          {isOwner && (
+            <div>
+              <div style={{
+                color: 'rgba(255,255,255,0.3)',
+                fontSize: '11px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                padding: '12px 12px 6px',
+                fontFamily: '"DM Sans", sans-serif',
+              }}>AI</div>
+              {mobileNavLink('/ai', '🤖 AI Advisor')}
+            </div>
+          )}
+
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
             color: '#ff4d4d',
@@ -148,13 +300,13 @@ function Navbar({ onLogout }) {
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '14px',
             width: '100%',
-            marginTop: '8px',
+            marginTop: '12px',
           }}>Logout</button>
         </div>
       )}
 
       <style>{`
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .hamburger { display: block !important; }
         }
