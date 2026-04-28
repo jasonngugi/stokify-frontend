@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stokify-v1';
+const CACHE_NAME = 'stokify-v2';
 const urlsToCache = [
   '/',
   '/index.html',
