@@ -19,6 +19,7 @@ import Expenses from './pages/Expenses';
 import CashFlow from './pages/CashFlow';
 import Credit from './pages/Credit';
 import Staff from './pages/Staff';
+import AIAdvisor from './pages/AIAdvisor';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -69,6 +70,7 @@ function App() {
             <Route path="/cashflow" element={<CashFlow />} />
             <Route path="/credit" element={<Credit />} />
             <Route path="/staff" element={<Staff />} />
+            <Route path="/ai" element={<AIAdvisor />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

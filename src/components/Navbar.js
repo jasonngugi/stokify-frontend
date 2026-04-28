@@ -45,6 +45,7 @@ function Navbar({ onLogout }) {
     { path: '/expiry', label: 'Expiry', ownerOnly: false },
     { path: '/slowmoving', label: 'Slow Moving', ownerOnly: false },
     { path: '/staff', label: 'Staff', ownerOnly: true },
+    { path: '/ai', label: '🤖 AI Advisor', ownerOnly: true },
   ];
 
   const pages = allPages.filter(p => !p.ownerOnly || isOwner);
