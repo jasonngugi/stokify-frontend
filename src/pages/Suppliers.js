@@ -79,7 +79,11 @@ function Suppliers() {
         .supplier-name { font-weight: 600; font-size: 15px; color: white; margin-bottom: 4px; }
         .supplier-detail { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
         .delete-btn { background: transparent; border: 1px solid rgba(255,77,77,0.3); color: #ff4d4d; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; white-space: nowrap; margin-left: 12px; }
-        .empty { text-align: center; padding: 30px; color: rgba(255,255,255,0.3); font-size: 14px; }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: white; margin-bottom: 8px; }
+        .empty-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 24px; }
+        .empty-btn { background: #00f5a0; color: #080810; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; }
         @media (min-width: 600px) {
           .suppliers-page { padding: 40px; }
           .suppliers-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
@@ -98,7 +102,7 @@ function Suppliers() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Supplier Name</label>
-                <input className="form-input" name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Nairobi Distributors Ltd" />
+                <input id="supplier-name-input" className="form-input" name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Nairobi Distributors Ltd" />
               </div>
               <div className="form-group">
                 <label className="form-label">Email <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
@@ -116,7 +120,14 @@ function Suppliers() {
 
           <div>
             <div className="section-title">Your Suppliers ({suppliers.length})</div>
-            {suppliers.length === 0 && <div className="empty">No suppliers added yet</div>}
+            {suppliers.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">🏭</div>
+                <div className="empty-title">No suppliers yet</div>
+                <p className="empty-subtitle">Add suppliers to track where you source your products</p>
+                <button className="empty-btn" onClick={() => document.getElementById('supplier-name-input')?.focus()}>Add Your First Supplier</button>
+              </div>
+            )}
             {suppliers.map(s => (
               <div key={s.id} className="supplier-card">
                 <div>

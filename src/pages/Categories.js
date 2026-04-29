@@ -72,7 +72,11 @@ function Categories() {
         .category-name { font-size: 14px; color: white; font-weight: 500; }
         .delete-btn { background: transparent; border: none; color: rgba(255,77,77,0.6); cursor: pointer; font-size: 16px; padding: 0; margin-left: 8px; }
         .delete-btn:hover { color: #ff4d4d; }
-        .empty { text-align: center; padding: 30px; color: rgba(255,255,255,0.3); font-size: 14px; }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: white; margin-bottom: 8px; }
+        .empty-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 24px; }
+        .empty-btn { background: #00f5a0; color: #080810; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; }
         @media (min-width: 600px) {
           .categories-page { padding: 40px; }
           .categories-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start; }
@@ -90,7 +94,7 @@ function Categories() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Category Name</label>
-                <input className="form-input" value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Beverages, Snacks, Household..." />
+                <input id="category-name-input" className="form-input" value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Beverages, Snacks, Household..." />
               </div>
               <button className="submit-btn" type="submit" disabled={loading}>
                 {loading ? 'Adding...' : 'Add Category'}
@@ -100,7 +104,14 @@ function Categories() {
 
           <div>
             <div className="section-title">Your Categories ({categories.length})</div>
-            {categories.length === 0 && <div className="empty">No categories yet — add your first one!</div>}
+            {categories.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">📁</div>
+                <div className="empty-title">No categories yet</div>
+                <p className="empty-subtitle">Categories help you organise your products</p>
+                <button className="empty-btn" onClick={() => document.getElementById('category-name-input')?.focus()}>Add Your First Category</button>
+              </div>
+            )}
             <div className="categories-grid">
               {categories.map(c => (
                 <div key={c.id} className="category-chip">

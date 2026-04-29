@@ -56,7 +56,11 @@ function SalesHistory() {
         .sale-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; color: rgba(255,255,255,0.7); }
         .sale-item-price { color: rgba(255,255,255,0.4); }
         .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); }
-        .empty { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: white; margin-bottom: 8px; }
+        .empty-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 24px; }
+        .empty-btn { display: inline-block; background: #00f5a0; color: #080810; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; }
         @media (min-width: 600px) {
   .history-page { padding: 40px; }
 }
@@ -78,7 +82,12 @@ function SalesHistory() {
         {loading && <div className="loading">Loading sales...</div>}
 
         {!loading && sales.length === 0 && (
-          <div className="empty">No sales recorded yet</div>
+          <div className="empty-state">
+            <div className="empty-icon">📊</div>
+            <div className="empty-title">No sales yet</div>
+            <p className="empty-subtitle">Start recording sales and they will appear here</p>
+            <a href="/sales" className="empty-btn">Record Your First Sale</a>
+          </div>
         )}
 
         {!loading && sales.map(sale => (
