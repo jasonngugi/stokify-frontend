@@ -11,6 +11,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     if (storeId) fetchProducts();
@@ -57,6 +58,10 @@ function Dashboard() {
     return groups;
   }, {});
 
+  const filteredGroupedProducts = selectedCategory
+    ? { [selectedCategory]: groupedProducts[selectedCategory] || [] }
+    : groupedProducts;
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -97,6 +102,12 @@ function Dashboard() {
         .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 14px; line-height: 1; font-family: 'DM Sans', sans-serif; }
         .refresh-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); }
         .last-updated { color: rgba(255,255,255,0.25); font-size: 12px; white-space: nowrap; }
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .filter-pill { border-radius: 20px; padding: 6px 16px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .filter-pill-active { background: #00f5a0; color: #080810; border: none; }
+        .filter-pill-inactive { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+        .pill-count-active { background: rgba(0,0,0,0.15); border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+        .pill-count-inactive { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 1px 7px; font-size: 11px; }
         .loading-state { display: flex; flex-direction: column; gap: 12px; }
         .skeleton { background: rgba(255,255,255,0.04); border-radius: 12px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -170,7 +181,33 @@ function Dashboard() {
           </div>
         )}
 
-        {Object.entries(groupedProducts).map(([category, items]) => (
+        {products.length > 0 && (
+          <div className="filter-row">
+            <button
+              className={`filter-pill ${selectedCategory === '' ? 'filter-pill-active' : 'filter-pill-inactive'}`}
+              onClick={() => setSelectedCategory('')}
+            >
+              All
+              <span className={selectedCategory === '' ? 'pill-count-active' : 'pill-count-inactive'}>
+                {products.length}
+              </span>
+            </button>
+            {Object.entries(groupedProducts).map(([category, items]) => (
+              <button
+                key={category}
+                className={`filter-pill ${selectedCategory === category ? 'filter-pill-active' : 'filter-pill-inactive'}`}
+                onClick={() => setSelectedCategory(selectedCategory === category ? '' : category)}
+              >
+                {category}
+                <span className={selectedCategory === category ? 'pill-count-active' : 'pill-count-inactive'}>
+                  {items.length}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {Object.entries(filteredGroupedProducts).map(([category, items]) => (
           <div key={category} className="category-section">
             <div className="category-header">
               <div className="category-title">{category}</div>
