@@ -15,6 +15,8 @@ function Sales() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
 
   useEffect(() => {
     if (storeId) {
@@ -56,7 +58,15 @@ function Sales() {
         customer_id: selectedCustomer || null,
         items: [{ product_id: selectedProduct, quantity: parseInt(quantity), unit_price: product.price }]
       });
-      setMessage(`✓ Sold ${quantity} × ${product.name} for KSh ${(product.price * quantity).toLocaleString()} via ${paymentMethod}`);
+      setReceiptData({
+        date: new Date().toLocaleString('en-KE'),
+        product: product.name,
+        quantity: parseInt(quantity),
+        unitPrice: product.price,
+        total: product.price * parseInt(quantity),
+        paymentMethod: paymentMethod
+      });
+      setShowReceipt(true);
       setSelectedProduct('');
       setQuantity('');
       setPaymentMethod('cash');
@@ -116,6 +126,28 @@ function Sales() {
         .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .in-stock { background: rgba(0,245,160,0.1); color: #00f5a0; }
         .low-stock { background: rgba(255,200,0,0.1); color: #ffc800; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .receipt-card { background: #080810; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; max-width: 340px; width: 100%; }
+        .receipt-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: white; text-align: center; margin-bottom: 4px; }
+        .receipt-tag { color: rgba(255,255,255,0.35); font-size: 12px; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .receipt-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 14px 0; }
+        .receipt-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 13px; }
+        .receipt-label { color: rgba(255,255,255,0.4); }
+        .receipt-value { color: rgba(255,255,255,0.85); font-weight: 500; text-align: right; max-width: 60%; }
+        .receipt-total-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+        .receipt-total-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: white; letter-spacing: 1px; }
+        .receipt-total-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: #00f5a0; }
+        .receipt-print-btn { width: 100%; padding: 12px; background: #00f5a0; color: #080810; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; margin-bottom: 10px; }
+        .receipt-close-btn { width: 100%; padding: 12px; background: transparent; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; }
+        @media print {
+          body > * { display: none !important; }
+          .modal-overlay { position: static !important; background: white !important; display: block !important; }
+          .receipt-card { border: none; max-width: 100%; color: black; background: white; }
+          .receipt-logo, .receipt-total-value { color: black !important; }
+          .receipt-label { color: #555 !important; }
+          .receipt-value { color: #000 !important; }
+          .receipt-print-btn, .receipt-close-btn { display: none !important; }
+        }
         @media (min-width: 600px) {
           .sales-page { padding: 40px; }
           .sales-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
@@ -197,6 +229,57 @@ function Sales() {
           </div>
         </div>
       </div>
+
+      {showReceipt && receiptData && (
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowReceipt(false); }}>
+          <div className="receipt-card">
+            <div className="receipt-logo">STOK<span style={{ color: '#00f5a0' }}>IFY</span></div>
+            <div className="receipt-tag">Sales Receipt</div>
+
+            <hr className="receipt-divider" />
+
+            <div className="receipt-row">
+              <span className="receipt-label">Date</span>
+              <span className="receipt-value">{receiptData.date}</span>
+            </div>
+            <div className="receipt-row">
+              <span className="receipt-label">Payment</span>
+              <span className="receipt-value" style={{ textTransform: 'capitalize' }}>{receiptData.paymentMethod}</span>
+            </div>
+
+            <hr className="receipt-divider" />
+
+            <div className="receipt-row">
+              <span className="receipt-label">Product</span>
+              <span className="receipt-value">{receiptData.product}</span>
+            </div>
+            <div className="receipt-row">
+              <span className="receipt-label">Qty</span>
+              <span className="receipt-value">{receiptData.quantity}</span>
+            </div>
+            <div className="receipt-row">
+              <span className="receipt-label">Unit Price</span>
+              <span className="receipt-value">KSh {receiptData.unitPrice.toLocaleString()}</span>
+            </div>
+
+            <hr className="receipt-divider" />
+
+            <div className="receipt-total-row">
+              <span className="receipt-total-label">TOTAL</span>
+              <span className="receipt-total-value">KSh {receiptData.total.toLocaleString()}</span>
+            </div>
+
+            <hr className="receipt-divider" />
+
+            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '12px', letterSpacing: '1px', marginBottom: '20px' }}>
+              THANK YOU FOR YOUR PURCHASE
+            </div>
+
+            <button className="receipt-print-btn" onClick={() => window.print()}>🖨 Print Receipt</button>
+            <button className="receipt-close-btn" onClick={() => setShowReceipt(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
