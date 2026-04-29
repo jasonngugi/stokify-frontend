@@ -59,6 +59,7 @@ function Navbar({ onLogout }) {
       items: [
         { path: '/suppliers', label: 'Suppliers' },
         { path: '/staff', label: 'Staff' },
+        { path: '/account', label: 'Account Settings' },
       ]
     },
   ];
