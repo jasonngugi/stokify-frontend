@@ -8,6 +8,7 @@ function Dashboard() {
   const { storeId } = useStore();
   const [products, setProducts] = useState([]);
   const [lowStock, setLowStock] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (storeId) fetchProducts();
@@ -21,6 +22,8 @@ function Dashboard() {
       setLowStock(allProducts.filter(p => p.quantity <= p.low_stock_threshold));
     } catch (err) {
       console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,12 +75,27 @@ function Dashboard() {
         .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .in-stock { background: rgba(0,245,160,0.1); color: #00f5a0; }
         .low-stock { background: rgba(255,200,0,0.1); color: #ffc800; }
+        .loading-state { display: flex; flex-direction: column; gap: 12px; }
+        .skeleton { background: rgba(255,255,255,0.04); border-radius: 12px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @media (min-width: 600px) {
           .stats-row { grid-template-columns: repeat(4, 1fr); }
           .dashboard { padding: 40px; }
         }
       `}</style>
       <div className="dashboard">
+        {loading && (
+          <div className="loading-state">
+            <div className="skeleton" style={{ height: '36px', width: '180px' }} />
+            <div className="skeleton" style={{ height: '16px', width: '260px' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+              {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: '80px' }} />)}
+            </div>
+            <div className="skeleton" style={{ height: '120px' }} />
+            <div className="skeleton" style={{ height: '200px' }} />
+          </div>
+        )}
+        {!loading && <>
         <h1 className="dashboard-title">Dashboard</h1>
         <p className="dashboard-subtitle">Welcome back — here's your inventory overview</p>
 
@@ -153,6 +171,7 @@ function Dashboard() {
             </div>
           </div>
         ))}
+        </>}
       </div>
     </>
   );
