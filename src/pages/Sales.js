@@ -17,6 +17,8 @@ function Sales() {
   const [loading, setLoading] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
+  const [productSearch, setProductSearch] = useState('');
+  const [showProductList, setShowProductList] = useState(false);
 
   useEffect(() => {
     if (storeId) {
@@ -68,6 +70,7 @@ function Sales() {
       });
       setShowReceipt(true);
       setSelectedProduct('');
+      setProductSearch('');
       setQuantity('');
       setPaymentMethod('cash');
       setSelectedCustomer('');
@@ -126,6 +129,14 @@ function Sales() {
         .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .in-stock { background: rgba(0,245,160,0.1); color: #00f5a0; }
         .low-stock { background: rgba(255,200,0,0.1); color: #ffc800; }
+        .product-search-wrapper { position: relative; }
+        .product-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #080810; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; max-height: 200px; overflow-y: auto; z-index: 50; }
+        .product-dropdown-item { padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .product-dropdown-item:last-child { border-bottom: none; }
+        .product-dropdown-item:hover { background: rgba(255,255,255,0.05); }
+        .product-dropdown-name { font-size: 14px; color: rgba(255,255,255,0.9); }
+        .product-dropdown-meta { font-size: 12px; color: rgba(255,255,255,0.4); text-align: right; }
+        .selected-product-info { background: rgba(0,245,160,0.05); border: 1px solid rgba(0,245,160,0.15); border-radius: 8px; padding: 10px 14px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .receipt-card { background: #080810; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; max-width: 340px; width: 100%; }
         .receipt-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: white; text-align: center; margin-bottom: 4px; }
@@ -166,14 +177,51 @@ function Sales() {
             <form onSubmit={handleSale}>
               <div className="form-group">
                 <label className="form-label">Select Product</label>
-                <select value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} required style={inputStyle}>
-                  <option value="" style={{ background: '#080810' }}>— Choose a product —</option>
-                  {products.map(p => (
-                    <option key={p.id} value={p.id} style={{ background: '#080810' }}>
-                      {p.name} (Stock: {p.quantity}) — KSh {p.price}
-                    </option>
-                  ))}
-                </select>
+                <div className="product-search-wrapper">
+                  <input
+                    style={inputStyle}
+                    type="text"
+                    placeholder="Search products..."
+                    value={productSearch}
+                    onChange={e => {
+                      setProductSearch(e.target.value);
+                      setShowProductList(true);
+                      setSelectedProduct('');
+                    }}
+                    onFocus={() => setShowProductList(true)}
+                    onBlur={() => setTimeout(() => setShowProductList(false), 150)}
+                    autoComplete="off"
+                  />
+                  {showProductList && (
+                    <div className="product-dropdown">
+                      {products
+                        .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                        .map(p => (
+                          <div
+                            key={p.id}
+                            className="product-dropdown-item"
+                            onMouseDown={() => {
+                              setSelectedProduct(p.id);
+                              setProductSearch(p.name);
+                              setShowProductList(false);
+                            }}
+                          >
+                            <span className="product-dropdown-name">{p.name}</span>
+                            <span className="product-dropdown-meta">{p.quantity} in stock · KSh {p.price}</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                {selectedProduct && (() => {
+                  const p = products.find(prod => prod.id === selectedProduct);
+                  return p ? (
+                    <div className="selected-product-info">
+                      <span style={{ color: '#00f5a0' }}>✓ {p.name}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)' }}>{p.quantity} units · KSh {p.price}</span>
+                    </div>
+                  ) : null;
+                })()}
               </div>
               <div className="form-group">
                 <label className="form-label">Quantity Sold</label>
