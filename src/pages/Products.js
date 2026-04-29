@@ -20,6 +20,8 @@ function Products() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [adjustingProduct, setAdjustingProduct] = useState(null);
+  const [adjustForm, setAdjustForm] = useState({ quantity: '', reason: 'Stock Count' });
 
   useEffect(() => {
     if (storeId) {
@@ -129,6 +131,18 @@ function Products() {
     }
   };
 
+  const handleAdjustSave = async (productId) => {
+    if (adjustForm.quantity === '') return;
+    try {
+      await axios.patch(`${BACKEND_URL}/products/${productId}`, { quantity: parseInt(adjustForm.quantity) });
+      setAdjustingProduct(null);
+      setAdjustForm({ quantity: '', reason: 'Stock Count' });
+      fetchProducts();
+    } catch (err) {
+      setError('Error adjusting stock.');
+    }
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()));
@@ -177,6 +191,13 @@ function Products() {
         .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: white; margin-bottom: 8px; }
         .empty-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 24px; }
         .results-count { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 12px; }
+        .adjust-btn { background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); color: #00f5a0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; }
+        .adjust-panel { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-top: none; border-radius: 0 0 12px 12px; padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
+        .adjust-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .adjust-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; width: 110px; }
+        .adjust-select { background: #0d0d1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+        .adjust-save-btn { background: #00f5a0; color: #080810; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+        .adjust-cancel-btn { background: transparent; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; }
         @media (min-width: 600px) {
           .products-page { padding: 40px; }
         }
@@ -289,30 +310,68 @@ function Products() {
             )}
 
             {filteredProducts.map(p => (
-              <div key={p.id} className="product-card">
-                <div className="product-info">
-                  <div className="product-name">{p.name}</div>
-                  <div className="product-meta">
-                    {p.sku && <span>SKU: {p.sku}</span>}
-                    {p.categories?.name && <span>📁 {p.categories.name}</span>}
-                    {p.suppliers?.name && <span>🏭 {p.suppliers.name}</span>}
-                    {p.expiry_date && <span>⏰ Expires: {new Date(p.expiry_date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+              <div key={p.id}>
+                <div className="product-card" style={adjustingProduct === p.id ? { borderRadius: '12px 12px 0 0', borderBottom: 'none', marginBottom: 0 } : {}}>
+                  <div className="product-info">
+                    <div className="product-name">{p.name}</div>
+                    <div className="product-meta">
+                      {p.sku && <span>SKU: {p.sku}</span>}
+                      {p.categories?.name && <span>📁 {p.categories.name}</span>}
+                      {p.suppliers?.name && <span>🏭 {p.suppliers.name}</span>}
+                      {p.expiry_date && <span>⏰ Expires: {new Date(p.expiry_date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    <div className="product-prices">
+                      <div className="product-selling">KSh {p.price}</div>
+                      {p.buying_price > 0 && <div className="product-buying">Cost: KSh {p.buying_price}</div>}
+                      {p.buying_price > 0 && <div className="product-margin">+KSh {(p.price - p.buying_price).toFixed(0)} margin</div>}
+                    </div>
+                    <span className={`stock-badge ${p.quantity <= p.low_stock_threshold ? 'low-stock' : 'in-stock'}`}>
+                      {p.quantity} units
+                    </span>
+                    <div className="product-actions">
+                      <button className="adjust-btn" onClick={() => {
+                        setAdjustingProduct(adjustingProduct === p.id ? null : p.id);
+                        setAdjustForm({ quantity: p.quantity, reason: 'Stock Count' });
+                      }}>Adjust Stock</button>
+                      <button className="edit-btn" onClick={() => handleEdit(p)}>Edit</button>
+                      <button className="delete-btn" onClick={() => handleDelete(p.id)}>Delete</button>
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                  <div className="product-prices">
-                    <div className="product-selling">KSh {p.price}</div>
-                    {p.buying_price > 0 && <div className="product-buying">Cost: KSh {p.buying_price}</div>}
-                    {p.buying_price > 0 && <div className="product-margin">+KSh {(p.price - p.buying_price).toFixed(0)} margin</div>}
+                {adjustingProduct === p.id && (
+                  <div className="adjust-panel">
+                    <div>
+                      <div className="adjust-label">New Quantity</div>
+                      <input
+                        className="adjust-input"
+                        type="number"
+                        min="0"
+                        value={adjustForm.quantity}
+                        onChange={e => setAdjustForm({ ...adjustForm, quantity: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <div className="adjust-label">Reason</div>
+                      <select
+                        className="adjust-select"
+                        value={adjustForm.reason}
+                        onChange={e => setAdjustForm({ ...adjustForm, reason: e.target.value })}
+                      >
+                        <option>Stock Count</option>
+                        <option>Damaged Goods</option>
+                        <option>Theft/Loss</option>
+                        <option>Supplier Return</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="adjust-save-btn" onClick={() => handleAdjustSave(p.id)}>Save</button>
+                      <button className="adjust-cancel-btn" onClick={() => { setAdjustingProduct(null); setAdjustForm({ quantity: '', reason: 'Stock Count' }); }}>Cancel</button>
+                    </div>
                   </div>
-                  <span className={`stock-badge ${p.quantity <= p.low_stock_threshold ? 'low-stock' : 'in-stock'}`}>
-                    {p.quantity} units
-                  </span>
-                  <div className="product-actions">
-                    <button className="edit-btn" onClick={() => handleEdit(p)}>Edit</button>
-                    <button className="delete-btn" onClick={() => handleDelete(p.id)}>Delete</button>
-                  </div>
-                </div>
+                )}
               </div>
             ))}
           </>
