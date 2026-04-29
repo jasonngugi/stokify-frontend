@@ -32,6 +32,49 @@ function Reports() {
     setLoading(false);
   };
 
+  const downloadCSV = (rows, filename) => {
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map(row => headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportProducts = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/products/${storeId}`);
+      const rows = res.data.products.map(p => ({
+        'Name': p.name,
+        'SKU': p.sku || '',
+        'Category': p.categories?.name || '',
+        'Quantity': p.quantity,
+        'Buying Price (KSh)': p.buying_price || 0,
+        'Selling Price (KSh)': p.price,
+        'Profit Margin': p.buying_price > 0 ? `${(((p.price - p.buying_price) / p.price) * 100).toFixed(1)}%` : '',
+      }));
+      downloadCSV(rows, 'stokify-products.csv');
+    } catch (err) {
+      console.error('Error exporting products:', err);
+    }
+  };
+
+  const exportSales = () => {
+    if (!monthly?.weekly) return;
+    const rows = monthly.weekly.map(w => ({
+      'Date': w.week,
+      'Total Amount (KSh)': w.revenue,
+      'Transactions': w.transactions,
+    }));
+    downloadCSV(rows, 'stokify-sales.csv');
+  };
+
   const downloadPDF = (data, title) => {
     const doc = new jsPDF();
     
@@ -150,6 +193,8 @@ function Reports() {
         .tab-active { background: #00f5a0; color: #080810; }
         .tab-inactive { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); }
         .download-btn { display: flex; align-items: center; gap: 8px; background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.3); color: #7c5cfc; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; margin-bottom: 20px; }
+        .export-btn { background: rgba(0,245,160,0.1); border: 1px solid rgba(0,245,160,0.2); color: #00f5a0; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; }
+        .export-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
         .period-label { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 16px; }
         .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); }
         @media (min-width: 600px) {
@@ -159,6 +204,11 @@ function Reports() {
       <div className="reports-page">
         <h1 className="reports-title">Reports</h1>
         <p className="reports-subtitle">Weekly and monthly performance reports</p>
+
+        <div className="export-row">
+          <button className="export-btn" onClick={exportProducts}>⬇ Export Products (Excel)</button>
+          <button className="export-btn" onClick={exportSales}>⬇ Export Sales (Excel)</button>
+        </div>
 
         {loading && <div className="loading">Generating reports...</div>}
 
