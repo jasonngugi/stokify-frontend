@@ -44,6 +44,13 @@ function Dashboard() {
         .dashboard-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: white; margin: 0 0 6px 0; letter-spacing: -1px; }
         .dashboard-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin: 0 0 24px 0; }
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .onboarding-box { background: rgba(124,92,252,0.06); border: 1px solid rgba(124,92,252,0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .onboarding-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: white; margin: 0 0 8px 0; }
+        .onboarding-desc { color: rgba(255,255,255,0.45); font-size: 14px; margin: 0 0 20px 0; line-height: 1.6; }
+        .onboarding-steps { list-style: none; padding: 0; margin: 0 0 20px 0; display: flex; flex-direction: column; gap: 10px; }
+        .onboarding-step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.7); }
+        .step-number { width: 24px; height: 24px; border-radius: 50%; background: rgba(124,92,252,0.25); border: 1px solid rgba(124,92,252,0.4); color: #7c5cfc; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .onboarding-btn { display: inline-block; background: #7c5cfc; color: white; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; }
         .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; }
         .stat-label { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
         .stat-value { font-size: 24px; font-weight: 700; font-family: 'Syne', sans-serif; color: white; }
@@ -73,6 +80,19 @@ function Dashboard() {
       <div className="dashboard">
         <h1 className="dashboard-title">Dashboard</h1>
         <p className="dashboard-subtitle">Welcome back — here's your inventory overview</p>
+
+        {products.length === 0 && (
+          <div className="onboarding-box">
+            <div className="onboarding-title">Get started with your inventory</div>
+            <p className="onboarding-desc">You haven't added any products yet. Follow these steps to set up your store.</p>
+            <ul className="onboarding-steps">
+              <li className="onboarding-step"><span className="step-number">1</span> Add your first product from the Products page</li>
+              <li className="onboarding-step"><span className="step-number">2</span> Organise products into categories</li>
+              <li className="onboarding-step"><span className="step-number">3</span> Set low-stock thresholds to get alerts</li>
+            </ul>
+            <a href="/products" className="onboarding-btn">Add your first product</a>
+          </div>
+        )}
 
         <div className="stats-row">
           <div className="stat-card">
