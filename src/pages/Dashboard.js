@@ -9,10 +9,27 @@ function Dashboard() {
   const [products, setProducts] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
   useEffect(() => {
     if (storeId) fetchProducts();
   }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const interval = setInterval(fetchProducts, 30000);
+    return () => clearInterval(interval);
+  }, [storeId]);
+
+  useEffect(() => {
+    if (!lastUpdated) return;
+    setSecondsAgo(0);
+    const ticker = setInterval(() => {
+      setSecondsAgo(s => s + 1);
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [lastUpdated]);
 
   const fetchProducts = async () => {
     try {
@@ -24,6 +41,7 @@ function Dashboard() {
       console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
+      setLastUpdated(Date.now());
     }
   };
 
@@ -75,6 +93,10 @@ function Dashboard() {
         .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .in-stock { background: rgba(0,245,160,0.1); color: #00f5a0; }
         .low-stock { background: rgba(255,200,0,0.1); color: #ffc800; }
+        .subtitle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 14px; line-height: 1; font-family: 'DM Sans', sans-serif; }
+        .refresh-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); }
+        .last-updated { color: rgba(255,255,255,0.25); font-size: 12px; white-space: nowrap; }
         .loading-state { display: flex; flex-direction: column; gap: 12px; }
         .skeleton { background: rgba(255,255,255,0.04); border-radius: 12px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -97,7 +119,11 @@ function Dashboard() {
         )}
         {!loading && <>
         <h1 className="dashboard-title">Dashboard</h1>
-        <p className="dashboard-subtitle">Welcome back — here's your inventory overview</p>
+        <div className="subtitle-row">
+          <p className="dashboard-subtitle" style={{ margin: 0 }}>Welcome back — here's your inventory overview</p>
+          <button className="refresh-btn" onClick={fetchProducts}>↻</button>
+          {lastUpdated && <span className="last-updated">Updated {secondsAgo}s ago</span>}
+        </div>
 
         {products.length === 0 && (
           <div className="onboarding-box">
