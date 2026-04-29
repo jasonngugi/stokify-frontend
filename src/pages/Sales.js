@@ -232,7 +232,7 @@ function Sales() {
 
       {showReceipt && receiptData && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowReceipt(false); }}>
-          <div className="receipt-card">
+          <div id="receipt-content" className="receipt-card">
             <div className="receipt-logo">STOK<span style={{ color: '#00f5a0' }}>IFY</span></div>
             <div className="receipt-tag">Sales Receipt</div>
 
@@ -275,7 +275,38 @@ function Sales() {
               THANK YOU FOR YOUR PURCHASE
             </div>
 
-            <button className="receipt-print-btn" onClick={() => window.print()}>🖨 Print Receipt</button>
+            <button className="receipt-print-btn" onClick={() => {
+              const printWindow = window.open('', '_blank');
+              printWindow.document.write(`
+                <html>
+                  <head>
+                    <title>STOKIFY Receipt</title>
+                    <style>
+                      body { font-family: Arial, sans-serif; padding: 20px; max-width: 300px; margin: 0 auto; }
+                      h2 { text-align: center; color: #00f5a0; }
+                      .divider { border-top: 1px dashed #ccc; margin: 10px 0; }
+                      .row { display: flex; justify-content: space-between; margin: 6px 0; font-size: 14px; }
+                      .total { font-weight: bold; font-size: 16px; }
+                      .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+                    </style>
+                  </head>
+                  <body>
+                    <h2>STOKIFY</h2>
+                    <p style="text-align:center; font-size:12px; color:#666;">${receiptData.date}</p>
+                    <div class="divider"></div>
+                    <div class="row"><span>${receiptData.product}</span><span>x${receiptData.quantity}</span></div>
+                    <div class="row"><span>Unit Price</span><span>KSh ${receiptData.unitPrice}</span></div>
+                    <div class="divider"></div>
+                    <div class="row total"><span>TOTAL</span><span>KSh ${receiptData.total}</span></div>
+                    <div class="row"><span>Payment</span><span>${receiptData.paymentMethod.toUpperCase()}</span></div>
+                    <div class="divider"></div>
+                    <div class="footer">Thank you for your business!<br/>Powered by STOKIFY</div>
+                  </body>
+                </html>
+              `);
+              printWindow.document.close();
+              printWindow.print();
+            }}>🖨 Print Receipt</button>
             <button className="receipt-close-btn" onClick={() => setShowReceipt(false)}>Close</button>
           </div>
         </div>
