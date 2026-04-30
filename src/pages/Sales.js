@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useStore } from '../storeContext';
 
@@ -19,6 +19,7 @@ function Sales() {
   const [receiptData, setReceiptData] = useState(null);
   const [productSearch, setProductSearch] = useState('');
   const [showProductList, setShowProductList] = useState(false);
+  const customerSelectRef = useRef(null);
 
   useEffect(() => {
     if (storeId) {
@@ -26,6 +27,18 @@ function Sales() {
       fetchCustomers();
     }
   }, [storeId]);
+
+  useEffect(() => {
+    if (paymentMethod === 'credit') {
+      customerSelectRef.current?.focus();
+      if (!selectedCustomer) {
+        const last = localStorage.getItem('last_credit_customer');
+        if (last && customers.find(c => c.id === last)) {
+          setSelectedCustomer(last);
+        }
+      }
+    }
+  }, [paymentMethod, customers]);
 
   const fetchProducts = async () => {
     try {
@@ -68,6 +81,9 @@ function Sales() {
         total: product.price * parseInt(quantity),
         paymentMethod: paymentMethod
       });
+      if (paymentMethod === 'credit' && selectedCustomer) {
+        localStorage.setItem('last_credit_customer', selectedCustomer);
+      }
       setShowReceipt(true);
       setSelectedProduct('');
       setProductSearch('');
@@ -243,7 +259,7 @@ function Sales() {
               {paymentMethod === 'credit' && (
                 <div className="form-group">
                   <label className="form-label">Customer <span style={{ color: 'rgba(255,255,255,0.25)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                  <select value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} style={inputStyle}>
+                  <select ref={customerSelectRef} value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} style={inputStyle}>
                     <option value="" style={{ background: '#080810' }}>— Select customer —</option>
                     {customers.map(c => (
                       <option key={c.id} value={c.id} style={{ background: '#080810' }}>{c.name} {c.phone ? `· ${c.phone}` : ''}</option>
