@@ -22,6 +22,7 @@ import Staff from './pages/Staff';
 import AIAdvisor from './pages/AIAdvisor';
 import ResetPassword from './pages/ResetPassword';
 import AccountSettings from './pages/AccountSettings';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -57,6 +58,7 @@ function App() {
           <Navbar onLogout={handleLogout} />
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/app" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/history" element={<SalesHistory />} />
@@ -81,7 +83,8 @@ function App() {
         </StoreProvider>
       ) : (
         <Routes>
-          <Route path="/" element={<Login onLogin={setUser} />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login onLogin={setUser} />} />
           <Route path="/signup" element={<Signup onLogin={setUser} />} />
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="/reorder" element={<Reorder />} />
