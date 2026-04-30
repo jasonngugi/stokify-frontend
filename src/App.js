@@ -23,6 +23,8 @@ import AIAdvisor from './pages/AIAdvisor';
 import ResetPassword from './pages/ResetPassword';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
@@ -77,6 +79,8 @@ function App() {
             <Route path="/ai" element={<AIAdvisor />} />
             <Route path="/account" element={<AccountSettings />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>
@@ -86,6 +90,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login onLogin={setUser} />} />
           <Route path="/signup" element={<Signup onLogin={setUser} />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="/reorder" element={<Reorder />} />
         </Routes>
