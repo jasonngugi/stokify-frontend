@@ -88,6 +88,10 @@ function AccountSettings() {
         .status-msg { font-size: 13px; margin-top: 12px; padding: 10px 14px; border-radius: 8px; }
         .status-success { background: rgba(0,245,160,0.08); color: #00f5a0; border: 1px solid rgba(0,245,160,0.2); }
         .status-error { background: rgba(255,80,80,0.08); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); }
+        .info-card { background: rgba(0,245,160,0.04); border: 1px solid rgba(0,245,160,0.1); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; }
+        .info-card-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+        .info-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: white; margin: 0 0 4px 0; }
+        .info-card-desc { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; margin: 0; }
         @media (min-width: 600px) {
           .settings-page { padding: 40px; }
           .settings-section { max-width: 520px; }
@@ -158,6 +162,27 @@ function AccountSettings() {
               </div>
             )}
           </form>
+        </div>
+
+        <div className="settings-section">
+          <div className="section-title">Data & Security</div>
+          <p className="section-desc">How we keep your store data protected.</p>
+
+          <div className="info-card">
+            <div className="info-card-icon">🔒</div>
+            <div>
+              <p className="info-card-title">Your data is safe</p>
+              <p className="info-card-desc">All your store data is securely stored in the cloud and automatically backed up. Your data belongs to you and can be exported at any time from the Reports page.</p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <div className="info-card-icon">☁️</div>
+            <div>
+              <p className="info-card-title">Cloud Storage</p>
+              <p className="info-card-desc">STOKIFY uses enterprise-grade infrastructure to store your data. Even if you lose your phone or computer, your data is always safe and accessible from any device.</p>
+            </div>
+          </div>
         </div>
       </div>
     </>
