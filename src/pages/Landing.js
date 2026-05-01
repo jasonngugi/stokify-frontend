@@ -6,6 +6,30 @@ function Landing() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(0,245,160,0.3); }
+          50% { box-shadow: 0 0 40px rgba(0,245,160,0.6); }
+        }
+        .hero-title { animation: fadeInUp 0.8s ease forwards; }
+        .hero-subtitle { animation: fadeInUp 0.8s ease 0.2s forwards; opacity: 0; }
+        .hero-buttons { animation: fadeInUp 0.8s ease 0.4s forwards; opacity: 0; }
+        .hero-preview { animation: fadeInUp 0.8s ease 0.6s forwards; opacity: 0; }
+        .feature-card { transition: transform 0.2s ease, border-color 0.2s ease; }
+        .feature-card:hover { transform: translateY(-4px); border-color: rgba(0,245,160,0.3) !important; }
+        .cta-btn-primary { animation: glow 2s infinite; }
+        .stat-float { animation: float 3s ease-in-out infinite; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .land { background: #080810; color: white; font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
@@ -98,15 +122,15 @@ function Landing() {
         {/* HERO */}
         <section className="land-hero">
           <div className="hero-badge">🇰🇪 Built for Kenyan Businesses</div>
-          <h1 className="hero-headline">
+          <h1 className="hero-headline hero-title">
             The Smartest Inventory System<br />
             <span>Built for Kenya</span>
           </h1>
-          <p className="hero-sub">
+          <p className="hero-sub hero-subtitle">
             Track stock, record sales, understand your profits — and get AI-powered business advice. All in one place.
           </p>
-          <div className="hero-btns">
-            <Link to="/signup" className="btn-green-lg">Start Free Trial</Link>
+          <div className="hero-btns hero-buttons">
+            <Link to="/signup" className="btn-green-lg cta-btn-primary">Start Free Trial</Link>
             <Link to="/login" className="btn-outline-lg">Sign In</Link>
           </div>
           <div className="hero-preview">
