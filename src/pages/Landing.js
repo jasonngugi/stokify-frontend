@@ -131,6 +131,7 @@ function Landing() {
           </p>
           <div className="hero-btns hero-buttons">
             <Link to="/signup" className="btn-green-lg cta-btn-primary">Start Free Trial</Link>
+            <Link to="/demo" className="btn-outline-lg">Try Demo</Link>
             <Link to="/login" className="btn-outline-lg">Sign In</Link>
           </div>
           <div className="hero-preview">

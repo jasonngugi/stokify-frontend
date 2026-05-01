@@ -21,6 +21,7 @@ import Credit from './pages/Credit';
 import Staff from './pages/Staff';
 import AIAdvisor from './pages/AIAdvisor';
 import ResetPassword from './pages/ResetPassword';
+import Demo from './pages/Demo';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
@@ -91,6 +92,7 @@ function App() {
           <Route path="/login" element={<Login onLogin={setUser} />} />
           <Route path="/signup" element={<Signup onLogin={setUser} />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/demo" element={<Demo />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Navigate to="/" />} />
