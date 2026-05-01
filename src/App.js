@@ -29,6 +29,7 @@ import Privacy from './pages/Privacy';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
+import BackToTop from './components/BackToTop';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -99,6 +100,7 @@ function App() {
           <Route path="/reorder" element={<Reorder />} />
         </Routes>
       )}
+      <BackToTop />
     </Router>
   );
 }
