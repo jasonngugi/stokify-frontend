@@ -24,28 +24,46 @@ function Signup({ onLogin }) {
     setLoading(true);
     setError('');
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { store_name: storeName } }
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
     try {
-      await axios.post(`${BACKEND_URL}/stores`, {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { store_name: storeName } }
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      console.log('Supabase signup user:', data.user);
+
+      if (!data.user) {
+        setError('Please check your email to confirm your account before continuing.');
+        setLoading(false);
+        return;
+      }
+
+      const storeRes = await axios.post(`${BACKEND_URL}/stores`, {
         name: storeName,
         user_id: data.user.id
       });
-    } catch (err) {
-      console.error('Error creating store:', err);
-    }
 
-    onLogin(data.user);
+      console.log('Store created:', storeRes.data);
+
+      if (storeRes.data?.error) {
+        setError(storeRes.data.error);
+        setLoading(false);
+        return;
+      }
+
+      onLogin(data.user);
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err.response?.data?.error || err.message || 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
