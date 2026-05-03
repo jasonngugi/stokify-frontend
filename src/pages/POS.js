@@ -336,7 +336,28 @@ function POS() {
                     </div>
                     <div className="pos-qty-ctrl">
                       <button className="pos-qty-btn" onClick={() => updateQty(product.id, -1)}>−</button>
-                      <span className="pos-qty-num">{quantity}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max={product.quantity}
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1;
+                          if (val > product.quantity) return;
+                          updateQty(product.id, val - quantity);
+                        }}
+                        style={{
+                          width: '50px',
+                          textAlign: 'center',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          fontSize: '14px',
+                          padding: '4px',
+                          fontFamily: 'DM Sans, sans-serif',
+                        }}
+                      />
                       <button className="pos-qty-btn" onClick={() => updateQty(product.id, 1)}>+</button>
                     </div>
                     <div className="pos-item-total">KSh {(product.price * quantity).toLocaleString()}</div>
