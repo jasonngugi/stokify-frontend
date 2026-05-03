@@ -22,6 +22,7 @@ import Staff from './pages/Staff';
 import AIAdvisor from './pages/AIAdvisor';
 import ResetPassword from './pages/ResetPassword';
 import Demo from './pages/Demo';
+import POS from './pages/POS';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
@@ -65,6 +66,7 @@ function App() {
             <Route path="/app" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/sales" element={<Sales />} />
+            <Route path="/pos" element={<POS />} />
             <Route path="/history" element={<SalesHistory />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/analytics" element={<Analytics />} />

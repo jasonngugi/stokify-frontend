@@ -126,6 +126,20 @@ function Navbar({ onLogout }) {
             whiteSpace: 'nowrap',
           }}>Dashboard</Link>
 
+          {/* POS */}
+          <Link to="/pos" style={{
+            color: location.pathname === '/pos' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+            textDecoration: 'none',
+            fontSize: '13px',
+            fontFamily: '"DM Sans", sans-serif',
+            fontWeight: location.pathname === '/pos' ? '600' : '400',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            background: location.pathname === '/pos' ? 'rgba(0,245,160,0.08)' : 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            whiteSpace: 'nowrap',
+          }}>🖥️ POS</Link>
+
           {/* Sales link for staff */}
           {!isOwner && (
             <Link to="/sales" style={{
@@ -259,6 +273,7 @@ function Navbar({ onLogout }) {
           overflowY: 'auto',
         }}>
           {mobileNavLink('/', 'Dashboard')}
+          {mobileNavLink('/pos', '🖥️ POS')}
           {!isOwner && mobileNavLink('/sales', 'Sales')}
           {!isOwner && mobileNavLink('/reorder', 'Reorder')}
           {!isOwner && mobileNavLink('/expiry', 'Expiry')}
