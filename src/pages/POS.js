@@ -22,7 +22,15 @@ function POS() {
   useEffect(() => {
     if (!storeId) return;
     axios.get(`${BACKEND_URL}/products/${storeId}`)
-      .then(res => setProducts(res.data.products || []))
+      .then(res => {
+        const allProducts = (res.data.products || []).map(p => ({
+          ...p,
+          price: parseFloat(p.price) || 0,
+          buying_price: parseFloat(p.buying_price) || 0,
+          quantity: parseInt(p.quantity) || 0,
+        }));
+        setProducts(allProducts);
+      })
       .catch(console.error);
   }, [storeId]);
 
@@ -70,7 +78,7 @@ function POS() {
   const removeItem = (productId) => setCart(prev => prev.filter(i => i.product.id !== productId));
   const clearCart = () => setCart([]);
 
-  const total = cart.reduce((sum, i) => sum + price(i.product.selling_price) * i.quantity, 0);
+  const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
 
   const handleCharge = async () => {
     if (cart.length === 0) return;
@@ -82,7 +90,7 @@ function POS() {
         items: cart.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity,
-          unit_price: price(item.product.selling_price),
+          unit_price: item.product.price,
         })),
       });
       setReceiptData({ items: [...cart], total, paymentMethod, date: new Date() });
@@ -121,7 +129,7 @@ function POS() {
       <p class="sub">${receiptData.date.toLocaleString('en-KE')}</p>
       <div class="div"></div>
       ${receiptData.items.map(i => `
-        <div class="row"><span>${i.product.name} ×${i.quantity}</span><span>KSh ${(price(i.product.selling_price) * i.quantity).toLocaleString()}</span></div>
+        <div class="row"><span>${i.product.name} ×${i.quantity}</span><span>KSh ${(i.product.price * i.quantity).toLocaleString()}</span></div>
       `).join('')}
       <div class="div"></div>
       <div class="row bold"><span>TOTAL</span><span>KSh ${receiptData.total.toLocaleString()}</span></div>
@@ -288,7 +296,7 @@ function POS() {
                       onClick={() => addToCart(p)}
                     >
                       <div className="pos-card-name">{p.name}</div>
-                      <div className="pos-card-price">KSh {price(p.selling_price).toLocaleString()}</div>
+                      <div className="pos-card-price">KSh {p.price.toLocaleString()}</div>
                       <span className={`pos-card-stock stock-${status}`}>
                         {status === 'out' ? 'Out of stock' : `${p.quantity} left`}
                       </span>
@@ -324,14 +332,14 @@ function POS() {
                   <div key={product.id} className="pos-cart-item">
                     <div className="pos-item-info">
                       <div className="pos-item-name">{product.name}</div>
-                      <div className="pos-item-unit">KSh {price(product.selling_price).toLocaleString()} each</div>
+                      <div className="pos-item-unit">KSh {product.price.toLocaleString()} each</div>
                     </div>
                     <div className="pos-qty-ctrl">
                       <button className="pos-qty-btn" onClick={() => updateQty(product.id, -1)}>−</button>
                       <span className="pos-qty-num">{quantity}</span>
                       <button className="pos-qty-btn" onClick={() => updateQty(product.id, 1)}>+</button>
                     </div>
-                    <div className="pos-item-total">KSh {(price(product.selling_price) * quantity).toLocaleString()}</div>
+                    <div className="pos-item-total">KSh {(product.price * quantity).toLocaleString()}</div>
                     <button className="pos-remove-btn" onClick={() => removeItem(product.id)}>✕</button>
                   </div>
                 ))
@@ -386,7 +394,7 @@ function POS() {
             {receiptData.items.map(({ product, quantity }) => (
               <div key={product.id} className="pos-modal-item">
                 <span>{product.name} ×{quantity}</span>
-                <span>KSh {(price(product.selling_price) * quantity).toLocaleString()}</span>
+                <span>KSh {(product.price * quantity).toLocaleString()}</span>
               </div>
             ))}
 
