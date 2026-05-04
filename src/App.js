@@ -22,6 +22,7 @@ import Staff from './pages/Staff';
 import AIAdvisor from './pages/AIAdvisor';
 import ResetPassword from './pages/ResetPassword';
 import Demo from './pages/Demo';
+import Accounting from './pages/Accounting';
 import POS from './pages/POS';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
@@ -76,6 +77,7 @@ function App() {
             <Route path="/seasonal" element={<Seasonal />} />
             <Route path="/daily" element={<DailySummary />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/accounting" element={<Accounting />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/cashflow" element={<CashFlow />} />
             <Route path="/credit" element={<Credit />} />

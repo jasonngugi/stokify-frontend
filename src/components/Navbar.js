@@ -41,6 +41,7 @@ function Navbar({ onLogout }) {
         { path: '/credit', label: 'Credit & Debt' },
         { path: '/expenses', label: 'Expenses' },
         { path: '/cashflow', label: 'Cash Flow' },
+        { path: '/accounting', label: 'Accounting' },
       ]
     },
     {
