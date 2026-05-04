@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useStore } from '../storeContext';
@@ -10,7 +10,6 @@ function Notifications() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const ref = useRef(null);
 
   useEffect(() => {
     if (!storeId) return;
@@ -18,11 +17,11 @@ function Notifications() {
   }, [storeId]);
 
   useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.notifications-wrapper')) setOpen(false);
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchNotifications = async () => {
@@ -92,7 +91,48 @@ function Notifications() {
   const count = notifications.length;
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <>
+    <style>{`
+      .notifications-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: #0f0f1a;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        width: 320px;
+        max-height: 400px;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        z-index: 200;
+      }
+      .notif-item {
+        display: block;
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        text-decoration: none;
+        transition: background 0.15s;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      @media (max-width: 600px) {
+        .notifications-dropdown {
+          position: fixed;
+          top: 60px;
+          left: 0;
+          right: 0;
+          width: 100%;
+          border-radius: 0 0 12px 12px;
+          margin-top: 0;
+        }
+        .notif-item {
+          padding: 14px 20px;
+          font-size: 14px;
+        }
+      }
+    `}</style>
+    <div className="notifications-wrapper" style={{ position: 'relative' }}>
       {/* BELL BUTTON */}
       <button
         onClick={() => setOpen(o => !o)}
@@ -136,20 +176,7 @@ function Notifications() {
 
       {/* DROPDOWN */}
       {open && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          right: 0,
-          marginTop: '8px',
-          background: '#0f0f1a',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '12px',
-          width: '320px',
-          maxHeight: '400px',
-          overflowY: 'auto',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          zIndex: 200,
-        }}>
+        <div className="notifications-dropdown">
           {/* Header */}
           <div style={{
             padding: '14px 16px',
@@ -181,18 +208,12 @@ function Notifications() {
                 key={i}
                 to={n.link}
                 onClick={() => setOpen(false)}
-                style={{
-                  display: 'block',
-                  padding: '12px 16px',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  textDecoration: 'none',
-                  background: n.bg,
-                  transition: 'background 0.15s',
-                }}
+                className="notif-item"
+                style={{ background: n.bg, color: n.color }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
                 onMouseLeave={e => e.currentTarget.style.background = n.bg}
               >
-                <div style={{ fontSize: '13px', color: n.color, lineHeight: 1.5 }}>{n.text}</div>
+                {n.text}
               </Link>
             ))
           )}
@@ -212,6 +233,7 @@ function Notifications() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
