@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../storeContext';
+import Notifications from './Notifications';
 
 function Navbar({ onLogout }) {
   const location = useLocation();
@@ -233,6 +234,9 @@ function Navbar({ onLogout }) {
             }}>🤖 AI Advisor</Link>
           )}
 
+          {/* Notifications */}
+          <Notifications />
+
           {/* Logout */}
           <button onClick={onLogout} style={{
             background: 'transparent',
@@ -273,6 +277,10 @@ function Navbar({ onLogout }) {
           maxHeight: '80vh',
           overflowY: 'auto',
         }}>
+          <div style={{ padding: '4px 0 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Notifications />
+            <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>Notifications</span>
+          </div>
           {mobileNavLink('/', 'Dashboard')}
           {mobileNavLink('/pos', '🖥️ POS')}
           {!isOwner && mobileNavLink('/sales', 'Sales')}
