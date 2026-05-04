@@ -346,6 +346,7 @@ function POS() {
                           if (val > product.quantity) return;
                           updateQty(product.id, val - quantity);
                         }}
+                        onFocus={(e) => e.target.select()}
                         style={{
                           width: '50px',
                           textAlign: 'center',
