@@ -7,6 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export function StoreProvider({ children, user }) {
   const [storeId, setStoreId] = useState(null);
   const [role, setRole] = useState(null);
+  const [businessType, setBusinessType] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +21,7 @@ export function StoreProvider({ children, user }) {
       const res = await axios.get(`${BACKEND_URL}/stores/user/${user.id}`);
       setStoreId(res.data.store_id);
       setRole(res.data.role);
+      setBusinessType(res.data.business_type || 'general');
     } catch (err) {
       console.error('Error fetching store:', err);
     }
@@ -27,7 +29,7 @@ export function StoreProvider({ children, user }) {
   };
 
   return (
-    <StoreContext.Provider value={{ storeId, role, loading }}>
+    <StoreContext.Provider value={{ storeId, role, businessType, loading }}>
       {children}
     </StoreContext.Provider>
   );

@@ -4,6 +4,19 @@ import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+const businessTypes = [
+  { value: 'general',     label: '🛒 General Shop / Duka' },
+  { value: 'restaurant',  label: '🍕 Restaurant / Cafe' },
+  { value: 'pharmacy',    label: '💊 Pharmacy / Chemist' },
+  { value: 'clothing',    label: '👗 Clothing / Boutique' },
+  { value: 'electronics', label: '📱 Electronics' },
+  { value: 'hardware',    label: '🔨 Hardware' },
+  { value: 'agrovet',     label: '🌾 Agrovet' },
+  { value: 'cosmetics',   label: '💄 Cosmetics / Beauty' },
+  { value: 'supermarket', label: '🏪 Supermarket / Superette' },
+  { value: 'other',       label: '🏢 Other' },
+];
+
 const BENEFITS = [
   'Track inventory in real time',
   'Know your profits instantly',
@@ -16,6 +29,7 @@ function Signup({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [businessType, setBusinessType] = useState('general');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +61,8 @@ function Signup({ onLogin }) {
 
       const storeRes = await axios.post(`${BACKEND_URL}/stores`, {
         name: storeName,
-        user_id: data.user.id
+        user_id: data.user.id,
+        business_type: businessType,
       });
 
       console.log('Store created:', storeRes.data);
@@ -238,6 +253,33 @@ function Signup({ onLogin }) {
                   <label style={labelStyle}>Store Name</label>
                   <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)} required
                     style={inputStyle} placeholder="e.g. Jason's General Store" />
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={labelStyle}>What type of business do you run?</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                    {businessTypes.map(bt => (
+                      <button
+                        key={bt.value}
+                        type="button"
+                        onClick={() => setBusinessType(bt.value)}
+                        style={{
+                          padding: '9px 10px',
+                          borderRadius: '9px',
+                          border: businessType === bt.value ? '1px solid rgba(0,245,160,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                          background: businessType === bt.value ? 'rgba(0,245,160,0.1)' : 'rgba(255,255,255,0.03)',
+                          color: businessType === bt.value ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+                          fontSize: '12px',
+                          fontFamily: '"DM Sans", sans-serif',
+                          fontWeight: businessType === bt.value ? '600' : '400',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {bt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div style={{ marginBottom: '20px' }}>
                   <label style={labelStyle}>Email</label>
