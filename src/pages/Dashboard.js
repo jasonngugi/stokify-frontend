@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { useStore } from '../storeContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -12,6 +13,7 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [mobileAlerts, setMobileAlerts] = useState([]);
 
   useEffect(() => {
     if (storeId) fetchProducts();
@@ -31,6 +33,36 @@ function Dashboard() {
     }, 1000);
     return () => clearInterval(ticker);
   }, [lastUpdated]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const fetchMobileAlerts = async () => {
+      try {
+        const [expiryRes, creditRes] = await Promise.all([
+          axios.get(`${BACKEND_URL}/expiry/${storeId}`),
+          axios.get(`${BACKEND_URL}/credit/${storeId}`),
+        ]);
+        const alerts = [];
+        const today = new Date();
+        const expiring = (expiryRes.data.products || []).filter(p => {
+          if (!p.expiry_date) return false;
+          return Math.ceil((new Date(p.expiry_date) - today) / 86400000) <= 7;
+        });
+        expiring.forEach(p => {
+          const days = Math.ceil((new Date(p.expiry_date) - today) / 86400000);
+          alerts.push({ text: `🕐 ${p.name} expires in ${days <= 0 ? 'today' : `${days}d`}`, link: '/expiry', color: '#ff4d4d' });
+        });
+        const credits = creditRes.data.credits || creditRes.data.sales || [];
+        const outstanding = credits.filter(c => !c.paid && c.payment_method === 'credit');
+        if (outstanding.length > 0) {
+          const total = outstanding.reduce((s, c) => s + (c.total_amount || c.total_price || 0), 0);
+          alerts.push({ text: `💳 KSh ${total.toLocaleString()} credit from ${outstanding.length} customer${outstanding.length !== 1 ? 's' : ''}`, link: '/credit', color: '#ff8c42' });
+        }
+        setMobileAlerts(alerts);
+      } catch (_) {}
+    };
+    fetchMobileAlerts();
+  }, [storeId]);
 
   const fetchProducts = async () => {
     try {
@@ -111,9 +143,17 @@ function Dashboard() {
         .loading-state { display: flex; flex-direction: column; gap: 12px; }
         .skeleton { background: rgba(255,255,255,0.04); border-radius: 12px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .mobile-alerts-card { background: rgba(255,200,0,0.06); border: 1px solid rgba(255,200,0,0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+        .mobile-alerts-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .mobile-alerts-title { font-size: 14px; font-weight: 700; color: #ffc800; }
+        .mobile-alerts-badge { background: #ff4d4d; color: white; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; }
+        .mobile-alert-item { display: block; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-decoration: none; font-size: 13px; line-height: 1.4; }
+        .mobile-alert-item:last-of-type { border-bottom: none; }
+        .mobile-alerts-footer { margin-top: 10px; font-size: 12px; color: #00f5a0; text-decoration: none; font-weight: 600; }
         @media (min-width: 600px) {
           .stats-row { grid-template-columns: repeat(4, 1fr); }
           .dashboard { padding: 40px; }
+          .mobile-alerts-card { display: none; }
         }
       `}</style>
       <div className="dashboard">
@@ -148,6 +188,25 @@ function Dashboard() {
             <a href="/products" className="onboarding-btn">Add your first product</a>
           </div>
         )}
+
+        {(() => {
+          const allAlerts = [
+            ...lowStock.slice(0, 3).map(p => ({ text: `⚠ ${p.name} — only ${p.quantity} units left`, link: '/reorder', color: '#ffc800' })),
+            ...mobileAlerts,
+          ].slice(0, 5);
+          return allAlerts.length > 0 ? (
+            <div className="mobile-alerts-card">
+              <div className="mobile-alerts-header">
+                <span className="mobile-alerts-title">🔔 Alerts</span>
+                <span className="mobile-alerts-badge">{allAlerts.length}</span>
+              </div>
+              {allAlerts.map((a, i) => (
+                <Link key={i} to={a.link} className="mobile-alert-item" style={{ color: a.color }}>{a.text}</Link>
+              ))}
+              <Link to="/reorder" className="mobile-alerts-footer">View all alerts →</Link>
+            </div>
+          ) : null;
+        })()}
 
         <div className="stats-row">
           <div className="stat-card">
