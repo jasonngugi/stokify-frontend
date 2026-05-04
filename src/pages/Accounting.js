@@ -195,8 +195,6 @@ function Accounting() {
         fontFamily: '"DM Sans", sans-serif',
         color: 'white',
         width: '100%',
-        maxWidth: '900px',
-        margin: '0 auto',
         boxSizing: 'border-box',
       }}>
 
