@@ -139,6 +139,8 @@ function POS() {
     </body></html>`);
     win.document.close();
     win.print();
+    win.onafterprint = () => win.close();
+    setTimeout(() => win.close(), 1000);
   };
 
   const fmtTime = (d) => d.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });

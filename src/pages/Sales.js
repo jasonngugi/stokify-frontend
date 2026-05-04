@@ -370,6 +370,8 @@ function Sales() {
               `);
               printWindow.document.close();
               printWindow.print();
+              printWindow.onafterprint = () => printWindow.close();
+              setTimeout(() => printWindow.close(), 1000);
             }}>🖨 Print Receipt</button>
             <button className="receipt-close-btn" onClick={() => setShowReceipt(false)}>Close</button>
           </div>
