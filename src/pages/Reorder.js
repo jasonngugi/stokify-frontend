@@ -35,6 +35,13 @@ function Reorder() {
         .reorder-product-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: white; margin-bottom: 4px; }
         .reorder-category { font-size: 12px; color: rgba(255,255,255,0.3); }
         .stock-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: rgba(255,200,0,0.1); color: #ffc800; }
+        .badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .urgency-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .urgency-critical { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+        .urgency-high { background: rgba(255,200,0,0.15); color: #ffc800; }
+        .urgency-normal { background: rgba(0,245,160,0.1); color: #00f5a0; }
+        .reorder-card.critical { border-color: rgba(255,77,77,0.25); }
+        .reorder-card.high { border-color: rgba(255,200,0,0.2); }
         .reorder-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .reorder-stat { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
         .reorder-stat-label { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
@@ -68,14 +75,23 @@ function Reorder() {
           </div>
         )}
 
-        {!loading && suggestions.map(s => (
-          <div key={s.id} className="reorder-card">
+        {!loading && suggestions.map(s => {
+          const urgencyClass = s.urgency === 'critical' ? 'urgency-critical' : s.urgency === 'high' ? 'urgency-high' : 'urgency-normal';
+          const urgencyLabel = s.urgency === 'critical' ? 'Critical' : s.urgency === 'high' ? 'Urgent' : 'Low Stock';
+          const daysColor = s.days_of_stock_left === null ? 'rgba(255,255,255,0.4)' : s.days_of_stock_left <= 3 ? '#ff4d4d' : s.days_of_stock_left <= 7 ? '#ffc800' : 'white';
+          const daysValue = s.days_of_stock_left === null ? 'No recent sales' : `${s.days_of_stock_left} days`;
+
+          return (
+          <div key={s.id} className={`reorder-card ${s.urgency || ''}`}>
             <div className="reorder-card-header">
               <div>
                 <div className="reorder-product-name">{s.name}</div>
                 <div className="reorder-category">{s.category || 'Uncategorised'}</div>
               </div>
-              <span className="stock-badge">{s.current_stock} left</span>
+              <div className="badges">
+                <span className="stock-badge">{s.current_stock} left</span>
+                <span className={`urgency-badge ${urgencyClass}`}>{urgencyLabel}</span>
+              </div>
             </div>
 
             <div className="reorder-stats">
@@ -97,6 +113,14 @@ function Reorder() {
                   {s.estimated_cost > 0 ? `KSh ${s.estimated_cost.toLocaleString()}` : '—'}
                 </div>
               </div>
+              <div className="reorder-stat">
+                <div className="reorder-stat-label">Days of Stock Left</div>
+                <div className="reorder-stat-value" style={{ color: daysColor, fontSize: '15px' }}>{daysValue}</div>
+              </div>
+              <div className="reorder-stat">
+                <div className="reorder-stat-label">Reorder Cycle</div>
+                <div className="reorder-stat-value" style={{ fontSize: '15px' }}>{s.cycle_days ? `${s.cycle_days} day cycle` : '—'}</div>
+              </div>
             </div>
 
             <div className="supplier-box">
@@ -112,7 +136,8 @@ function Reorder() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );
