@@ -5,8 +5,25 @@ import { supabase } from '../supabaseClient';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+const businessTypes = [
+  { value: 'general',     label: '🛒 General Shop / Duka' },
+  { value: 'restaurant',  label: '🍕 Restaurant / Cafe' },
+  { value: 'pharmacy',    label: '💊 Pharmacy / Chemist' },
+  { value: 'clothing',    label: '👗 Clothing / Boutique' },
+  { value: 'electronics', label: '📱 Electronics' },
+  { value: 'hardware',    label: '🔨 Hardware' },
+  { value: 'agrovet',     label: '🌾 Agrovet' },
+  { value: 'cosmetics',   label: '💄 Cosmetics / Beauty' },
+  { value: 'supermarket', label: '🏪 Supermarket / Superette' },
+  { value: 'other',       label: '🏢 Other' },
+];
+
 function AccountSettings() {
-  const { storeId } = useStore();
+  const { storeId, businessType: contextBusinessType } = useStore();
+
+  const [selectedBusinessType, setSelectedBusinessType] = useState(contextBusinessType || 'general');
+  const [businessTypeStatus, setBusinessTypeStatus] = useState(null);
+  const [businessTypeLoading, setBusinessTypeLoading] = useState(false);
 
   const [storeName, setStoreName] = useState('');
   const [storeNameStatus, setStoreNameStatus] = useState(null);
@@ -20,6 +37,19 @@ function AccountSettings() {
   useEffect(() => {
     if (storeId) fetchStoreName();
   }, [storeId]);
+
+  const handleBusinessTypeSubmit = async () => {
+    setBusinessTypeLoading(true);
+    setBusinessTypeStatus(null);
+    try {
+      await axios.patch(`${BACKEND_URL}/stores/${storeId}`, { business_type: selectedBusinessType });
+      setBusinessTypeStatus({ type: 'success', message: 'Business type updated.' });
+    } catch (err) {
+      setBusinessTypeStatus({ type: 'error', message: 'Failed to update business type.' });
+    } finally {
+      setBusinessTypeLoading(false);
+    }
+  };
 
   const fetchStoreName = async () => {
     try {
@@ -88,6 +118,10 @@ function AccountSettings() {
         .status-msg { font-size: 13px; margin-top: 12px; padding: 10px 14px; border-radius: 8px; }
         .status-success { background: rgba(0,245,160,0.08); color: #00f5a0; border: 1px solid rgba(0,245,160,0.2); }
         .status-error { background: rgba(255,80,80,0.08); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); }
+        .biz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+        .biz-btn { padding: 9px 10px; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; text-align: left; transition: all 0.15s; }
+        .biz-btn.active { border: 1px solid rgba(0,245,160,0.3); background: rgba(0,245,160,0.1); color: #00f5a0; font-weight: 600; }
+        .biz-btn.inactive { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.6); font-weight: 400; }
         .info-card { background: rgba(0,245,160,0.04); border: 1px solid rgba(0,245,160,0.1); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; }
         .info-card-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
         .info-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: white; margin: 0 0 4px 0; }
@@ -100,6 +134,33 @@ function AccountSettings() {
       <div className="settings-page">
         <h1 className="settings-title">Account Settings</h1>
         <p className="settings-subtitle">Manage your store details and security</p>
+
+        <div className="settings-section">
+          <div className="section-title">Business Details</div>
+          <p className="section-desc">Tell us what type of business you run — this improves reorder suggestions and AI advice.</p>
+          <div className="biz-grid">
+            {businessTypes.map(bt => (
+              <button
+                key={bt.value}
+                type="button"
+                className={`biz-btn ${selectedBusinessType === bt.value ? 'active' : 'inactive'}`}
+                onClick={() => setSelectedBusinessType(bt.value)}
+              >
+                {bt.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: '16px' }}>
+            <button className="submit-btn" onClick={handleBusinessTypeSubmit} disabled={businessTypeLoading}>
+              {businessTypeLoading ? 'Saving…' : 'Save Business Type'}
+            </button>
+            {businessTypeStatus && (
+              <div className={`status-msg ${businessTypeStatus.type === 'success' ? 'status-success' : 'status-error'}`}>
+                {businessTypeStatus.message}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="settings-section">
           <div className="section-title">Store Details</div>
