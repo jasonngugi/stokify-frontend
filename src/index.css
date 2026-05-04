@@ -46,6 +46,13 @@ html, body {
   }
 }
 
+.accounting-page {
+  min-height: 100vh;
+  background: #080810;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

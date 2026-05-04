@@ -191,9 +191,10 @@ function Accounting() {
       <div className="accounting-page" style={{
         background: '#080810',
         minHeight: '100vh',
-        padding: '28px 24px',
+        padding: '20px',
         fontFamily: '"DM Sans", sans-serif',
         color: 'white',
+        width: '100%',
         maxWidth: '900px',
         margin: '0 auto',
         boxSizing: 'border-box',
