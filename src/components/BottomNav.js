@@ -5,7 +5,7 @@ const navItems = [
   { path: '/', icon: '🏠', label: 'Home' },
   { path: '/products', icon: '📦', label: 'Inventory' },
   { path: '/pos', icon: '🖥️', label: 'POS' },
-  { path: '/sales', icon: '💰', label: 'Finance' },
+  { path: '/analytics', icon: '📊', label: 'Insights' },
   { path: '/ai', icon: '🤖', label: 'AI' },
 ];
 
