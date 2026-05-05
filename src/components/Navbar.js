@@ -271,46 +271,55 @@ function Navbar({ onLogout }) {
       {menuOpen && (
         <div style={{
           background: 'rgba(10,10,20,0.98)',
-          padding: '12px 16px 20px',
+          padding: '12px 16px 100px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           position: 'sticky',
           top: '60px',
           zIndex: 99,
-          maxHeight: '80vh',
+          maxHeight: 'calc(100vh - 60px)',
           overflowY: 'auto',
         }}>
-          {mobileNavLink('/', 'Dashboard')}
+          {/* POS — not in bottom nav */}
           {mobileNavLink('/pos', '🖥️ POS')}
-          {!isOwner && mobileNavLink('/sales', 'Sales')}
-          {!isOwner && mobileNavLink('/reorder', 'Reorder')}
-          {!isOwner && mobileNavLink('/expiry', 'Expiry')}
 
-          {isOwner && navGroups.map(group => (
-            <div key={group.label}>
-              <div style={{
-                color: 'rgba(255,255,255,0.3)',
-                fontSize: '11px',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                padding: '12px 12px 6px',
-                fontFamily: '"DM Sans", sans-serif',
-              }}>{group.label}</div>
-              {group.items.map(item => mobileNavLink(item.path, item.label))}
-            </div>
-          ))}
+          {/* Inventory group */}
+          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Inventory</div>
+          {isOwner && mobileNavLink('/categories', '📁 Categories')}
+          {mobileNavLink('/reorder', '🔄 Reorder')}
+          {mobileNavLink('/expiry', '⏰ Expiry')}
+          {mobileNavLink('/slowmoving', '📉 Slow Moving')}
 
+          {/* Finance group */}
           {isOwner && (
-            <div>
-              <div style={{
-                color: 'rgba(255,255,255,0.3)',
-                fontSize: '11px',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                padding: '12px 12px 6px',
-                fontFamily: '"DM Sans", sans-serif',
-              }}>AI</div>
-              {mobileNavLink('/ai', '🤖 AI Advisor')}
-            </div>
+            <>
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Finance</div>
+              {mobileNavLink('/history', '📋 Sales History')}
+              {mobileNavLink('/credit', '💳 Credit & Debt')}
+              {mobileNavLink('/expenses', '💸 Expenses')}
+              {mobileNavLink('/cashflow', '💹 Cash Flow')}
+              {mobileNavLink('/accounting', '📊 Accounting')}
+            </>
+          )}
+
+          {/* Insights group */}
+          {isOwner && (
+            <>
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Insights</div>
+              {mobileNavLink('/analytics', '📈 Analytics')}
+              {mobileNavLink('/daily', '📅 Daily Summary')}
+              {mobileNavLink('/reports', '📄 Reports')}
+              {mobileNavLink('/seasonal', '🌦 Seasonal')}
+            </>
+          )}
+
+          {/* Settings group */}
+          {isOwner && (
+            <>
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Settings</div>
+              {mobileNavLink('/suppliers', '🏭 Suppliers')}
+              {mobileNavLink('/staff', '👥 Staff')}
+              {mobileNavLink('/account', '⚙️ Account')}
+            </>
           )}
 
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
@@ -323,7 +332,7 @@ function Navbar({ onLogout }) {
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '14px',
             width: '100%',
-            marginTop: '12px',
+            marginTop: '16px',
           }}>Logout</button>
         </div>
       )}
