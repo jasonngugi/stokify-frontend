@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useStore } from '../storeContext';
+import { supabase } from '../supabaseClient';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -41,14 +42,17 @@ function Dashboard() {
     if (!storeId) return;
     const fetchMeta = async () => {
       try {
+        const { data: { user } } = await supabase.auth.getUser();
         const [storeRes, dailyRes] = await Promise.all([
-          axios.get(`${BACKEND_URL}/stores/${storeId}`),
+          axios.get(`${BACKEND_URL}/stores/user/${user?.id}`),
           axios.get(`${BACKEND_URL}/daily-summary/${storeId}`),
         ]);
-        setStoreName(storeRes.data.name || '');
+        setStoreName(storeRes.data.store?.name || 'Your Store');
         setTodayRevenue(dailyRes.data.totalRevenue ?? 0);
         setTodaySales(dailyRes.data.totalTransactions ?? 0);
-      } catch (_) {}
+      } catch (err) {
+        setStoreName('Your Store');
+      }
     };
     fetchMeta();
   }, [storeId]);
