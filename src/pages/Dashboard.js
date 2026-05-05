@@ -14,7 +14,6 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [mobileAlerts, setMobileAlerts] = useState([]);
   const [storeName, setStoreName] = useState('');
   const [todayRevenue, setTodayRevenue] = useState(null);
   const [todaySales, setTodaySales] = useState(null);
@@ -57,35 +56,6 @@ function Dashboard() {
     fetchMeta();
   }, [storeId]);
 
-  useEffect(() => {
-    if (!storeId) return;
-    const fetchMobileAlerts = async () => {
-      try {
-        const [expiryRes, creditRes] = await Promise.all([
-          axios.get(`${BACKEND_URL}/expiry/${storeId}`),
-          axios.get(`${BACKEND_URL}/credit/${storeId}`),
-        ]);
-        const alerts = [];
-        const today = new Date();
-        const expiring = (expiryRes.data.products || []).filter(p => {
-          if (!p.expiry_date) return false;
-          return Math.ceil((new Date(p.expiry_date) - today) / 86400000) <= 7;
-        });
-        expiring.forEach(p => {
-          const days = Math.ceil((new Date(p.expiry_date) - today) / 86400000);
-          alerts.push({ text: `🕐 ${p.name} expires in ${days <= 0 ? 'today' : `${days}d`}`, link: '/expiry', color: '#ff4d4d' });
-        });
-        const credits = creditRes.data.credits || creditRes.data.sales || [];
-        const outstanding = credits.filter(c => !c.paid && c.payment_method === 'credit');
-        if (outstanding.length > 0) {
-          const total = outstanding.reduce((s, c) => s + (c.total_amount || c.total_price || 0), 0);
-          alerts.push({ text: `💳 KSh ${total.toLocaleString()} credit from ${outstanding.length} customer${outstanding.length !== 1 ? 's' : ''}`, link: '/credit', color: '#ff8c42' });
-        }
-        setMobileAlerts(alerts);
-      } catch (_) {}
-    };
-    fetchMobileAlerts();
-  }, [storeId]);
 
   const fetchProducts = async () => {
     try {
@@ -101,9 +71,7 @@ function Dashboard() {
     }
   };
 
-  const totalItems = products.reduce((sum, p) => sum + p.quantity, 0);
-  const totalValue = products.reduce((sum, p) => sum + p.quantity * p.price, 0);
-  const totalProfit = products.reduce((sum, p) => sum + (p.price - p.buying_price) * p.quantity, 0);
+
 
   // Group products by category
   const groupedProducts = products.reduce((groups, product) => {
@@ -251,47 +219,6 @@ function Dashboard() {
           </div>
         )}
 
-        {(() => {
-          const allAlerts = [
-            ...lowStock.slice(0, 3).map(p => ({ text: `⚠ ${p.name} — only ${p.quantity} units left`, link: '/reorder', color: '#ffc800' })),
-            ...mobileAlerts,
-          ].slice(0, 5);
-          return allAlerts.length > 0 ? (
-            <div className="mobile-alerts-card">
-              <div className="mobile-alerts-header">
-                <span className="mobile-alerts-title">🔔 Alerts</span>
-                <span className="mobile-alerts-badge">{allAlerts.length}</span>
-              </div>
-              {allAlerts.map((a, i) => (
-                <Link key={i} to={a.link} className="mobile-alert-item" style={{ color: a.color }}>{a.text}</Link>
-              ))}
-              <Link to="/reorder" className="mobile-alerts-footer">View all alerts →</Link>
-            </div>
-          ) : null;
-        })()}
-
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-label">Products</div>
-            <div className="stat-value">{products.length}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Total Items</div>
-            <div className="stat-value">{totalItems}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Stock Value</div>
-            <div className="stat-value" style={{ color: '#00f5a0', fontSize: '18px' }}>KSh {totalValue.toLocaleString()}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Potential Profit</div>
-            <div className="stat-value" style={{ color: '#7c5cfc', fontSize: '18px' }}>KSh {totalProfit.toLocaleString()}</div>
-          </div>
-          <div className="stat-card" style={{ borderColor: lowStock.length > 0 ? 'rgba(255,200,0,0.3)' : 'rgba(255,255,255,0.08)' }}>
-            <div className="stat-label">Low Stock</div>
-            <div className="stat-value" style={{ color: lowStock.length > 0 ? '#ffc800' : 'white' }}>{lowStock.length}</div>
-          </div>
-        </div>
 
         {products.length > 0 && (
           <div className="filter-row">
