@@ -32,6 +32,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
 import BackToTop from './components/BackToTop';
+import BottomNav from './components/BottomNav';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -105,6 +106,7 @@ function App() {
         </Routes>
       )}
       <BackToTop />
+      <BottomNav />
     </Router>
   );
 }
