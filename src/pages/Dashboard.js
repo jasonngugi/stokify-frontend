@@ -14,6 +14,9 @@ function Dashboard() {
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [mobileAlerts, setMobileAlerts] = useState([]);
+  const [storeName, setStoreName] = useState('');
+  const [todayRevenue, setTodayRevenue] = useState(null);
+  const [todaySales, setTodaySales] = useState(null);
 
   useEffect(() => {
     if (storeId) fetchProducts();
@@ -33,6 +36,22 @@ function Dashboard() {
     }, 1000);
     return () => clearInterval(ticker);
   }, [lastUpdated]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const fetchMeta = async () => {
+      try {
+        const [storeRes, dailyRes] = await Promise.all([
+          axios.get(`${BACKEND_URL}/stores/${storeId}`),
+          axios.get(`${BACKEND_URL}/daily-summary/${storeId}`),
+        ]);
+        setStoreName(storeRes.data.name || '');
+        setTodayRevenue(dailyRes.data.totalRevenue ?? 0);
+        setTodaySales(dailyRes.data.totalTransactions ?? 0);
+      } catch (_) {}
+    };
+    fetchMeta();
+  }, [storeId]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -169,9 +188,48 @@ function Dashboard() {
           </div>
         )}
         {!loading && <>
-        <h1 className="dashboard-title">Dashboard</h1>
-        <div className="subtitle-row">
-          <p className="dashboard-subtitle" style={{ margin: 0 }}>Welcome back — here's your inventory overview</p>
+        {(() => {
+          const hour = new Date().getHours();
+          const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+          const todayDate = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          return (
+            <>
+              <h1 className="dashboard-title">{greeting}, {storeName || 'your store'}! 👋</h1>
+              <p className="dashboard-subtitle">{todayDate}</p>
+            </>
+          );
+        })()}
+
+        {/* Mini stat pills */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '24px', paddingBottom: '4px' }}>
+          {[
+            { label: "Today's Revenue", value: todayRevenue !== null ? `KSh ${todayRevenue.toLocaleString()}` : '—' },
+            { label: "Today's Sales", value: todaySales !== null ? todaySales : '—' },
+            { label: 'Low Stock', value: lowStock.length },
+            { label: 'Total Products', value: products.length },
+          ].map((pill, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{pill.label}</span>
+              <span style={{ color: 'white', fontSize: '14px', fontWeight: 600 }}>{pill.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '24px', paddingBottom: '4px' }}>
+          {[
+            { label: '+ Add Product', to: '/products' },
+            { label: 'Record Sale', to: '/sales' },
+            { label: 'Open POS', to: '/pos' },
+            { label: 'View Reports', to: '/reports' },
+          ].map(action => (
+            <Link key={action.to} to={action.to} style={{ background: 'rgba(0,245,160,0.08)', border: '1px solid rgba(0,245,160,0.15)', color: '#00f5a0', borderRadius: '20px', padding: '8px 18px', fontSize: '13px', whiteSpace: 'nowrap', textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', display: 'inline-block' }}>
+              {action.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="subtitle-row" style={{ marginBottom: '16px' }}>
           <button className="refresh-btn" onClick={fetchProducts}>↻</button>
           {lastUpdated && <span className="last-updated">Updated {secondsAgo}s ago</span>}
         </div>
