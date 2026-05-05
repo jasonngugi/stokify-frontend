@@ -231,15 +231,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {lowStock.length > 0 && (
-          <div className="alert-box">
-            <div className="alert-title">⚠ Low Stock Alert</div>
-            {lowStock.map(p => (
-              <div key={p.id} className="alert-item">{p.name} — only {p.quantity} units left</div>
-            ))}
-          </div>
-        )}
-
         {products.length > 0 && (
           <div className="filter-row">
             <button
