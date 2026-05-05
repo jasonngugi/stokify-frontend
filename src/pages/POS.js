@@ -382,25 +382,27 @@ function POS() {
                 </div>
               </div>
 
-              <div className="pos-payment">
-                {PAYMENT_METHODS.map(m => (
-                  <button
-                    key={m.value}
-                    className={`pos-pay-btn ${paymentMethod === m.value ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod(m.value)}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
+              <div style={{ marginBottom: '80px' }}>
+                <div className="pos-payment">
+                  {PAYMENT_METHODS.map(m => (
+                    <button
+                      key={m.value}
+                      className={`pos-pay-btn ${paymentMethod === m.value ? 'active' : ''}`}
+                      onClick={() => setPaymentMethod(m.value)}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
 
-              <button
-                className="pos-charge-btn"
-                onClick={handleCharge}
-                disabled={cart.length === 0 || loading}
-              >
-                {loading ? 'Processing...' : `Charge KSh ${total.toLocaleString()}`}
-              </button>
+                <button
+                  className="pos-charge-btn"
+                  onClick={handleCharge}
+                  disabled={cart.length === 0 || loading}
+                >
+                  {loading ? 'Processing...' : `Charge KSh ${total.toLocaleString()}`}
+                </button>
+              </div>
             </div>
           </div>
         </div>
