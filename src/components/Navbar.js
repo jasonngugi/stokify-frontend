@@ -252,17 +252,19 @@ function Navbar({ onLogout }) {
           }}>Logout</button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button onClick={() => setMenuOpen(!menuOpen)} style={{
-          background: 'transparent',
-          border: 'none',
-          color: 'white',
-          fontSize: '22px',
-          cursor: 'pointer',
-          display: 'none',
-        }} className="hamburger">
-          {menuOpen ? '✕' : '☰'}
-        </button>
+        {/* Mobile actions (notifications + hamburger) */}
+        <div className="mobile-actions" style={{ display: 'none', alignItems: 'center', gap: '4px' }}>
+          <Notifications />
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'white',
+            fontSize: '22px',
+            cursor: 'pointer',
+          }}>
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -277,10 +279,6 @@ function Navbar({ onLogout }) {
           maxHeight: '80vh',
           overflowY: 'auto',
         }}>
-          <div style={{ padding: '4px 0 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Notifications />
-            <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>Notifications</span>
-          </div>
           {mobileNavLink('/', 'Dashboard')}
           {mobileNavLink('/pos', '🖥️ POS')}
           {!isOwner && mobileNavLink('/sales', 'Sales')}
@@ -333,7 +331,10 @@ function Navbar({ onLogout }) {
       <style>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
-          .hamburger { display: block !important; }
+          .mobile-actions { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-actions { display: none !important; }
         }
       `}</style>
     </>
