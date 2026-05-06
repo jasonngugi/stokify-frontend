@@ -106,7 +106,7 @@ function App() {
         </Routes>
       )}
       <BackToTop />
-      <BottomNav />
+      {user && <BottomNav />}
     </Router>
   );
 }
