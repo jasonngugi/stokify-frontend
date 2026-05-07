@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useStore } from '../storeContext';
+import { supabase } from '../supabaseClient';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -70,9 +71,13 @@ function Locations() {
     setAddLoading(true);
     setAddError('');
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       await axios.post(`${BACKEND_URL}/branches`, {
-        ...branchForm,
         parent_store_id: storeId,
+        name: branchForm.name,
+        location: branchForm.location,
+        business_type: branchForm.business_type,
+        user_id: user.id,
       });
       setShowAddModal(false);
       setBranchForm({ name: '', location: '', business_type: 'general' });
