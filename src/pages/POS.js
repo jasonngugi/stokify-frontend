@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useStore } from '../storeContext';
@@ -18,6 +18,7 @@ function POS() {
   const [receiptData, setReceiptData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(new Date());
+  const searchRef = useRef(null);
 
   useEffect(() => {
     if (!storeId) return;
@@ -37,6 +38,10 @@ function POS() {
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    searchRef.current?.focus();
   }, []);
 
   const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
@@ -269,11 +274,40 @@ function POS() {
           <div className="pos-left">
             <div className="pos-left-top">
               <input
+                ref={searchRef}
                 className="pos-search"
-                placeholder="Search products..."
+                placeholder="Search or scan barcode..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={e => {
+                  const val = e.target.value;
+                  setSearch(val);
+                  const matches = products.filter(p =>
+                    p.name.toLowerCase().includes(val.toLowerCase()) &&
+                    (!selectedCategory || p.category === selectedCategory)
+                  );
+                  if (val && matches.length === 1) {
+                    setTimeout(() => {
+                      addToCart(matches[0]);
+                      setSearch('');
+                    }, 300);
+                  }
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const matches = products.filter(p =>
+                      p.name.toLowerCase().includes(search.toLowerCase()) &&
+                      (!selectedCategory || p.category === selectedCategory)
+                    );
+                    if (matches.length === 1) {
+                      addToCart(matches[0]);
+                      setSearch('');
+                    }
+                  }
+                }}
               />
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', marginTop: '6px', paddingLeft: '2px' }}>
+                💡 Compatible with USB &amp; Bluetooth barcode scanners
+              </div>
             </div>
             <div className="pos-cats">
               <button className={`pos-cat ${selectedCategory === '' ? 'active' : ''}`} onClick={() => setSelectedCategory('')}>All</button>
