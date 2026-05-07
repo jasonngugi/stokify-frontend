@@ -34,7 +34,7 @@ function Locations() {
   // Transfer modal
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferForm, setTransferForm] = useState({ from_store_id: '', to_store_id: '', product_id: '', quantity: 1, notes: '' });
-  const [sourceProducts, setSourceProducts] = useState([]);
+  const [transferProducts, setTransferProducts] = useState([]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState('');
   const [transferSuccess, setTransferSuccess] = useState('');
@@ -88,23 +88,27 @@ function Locations() {
     setAddLoading(false);
   };
 
+  useEffect(() => {
+    if (transferForm.from_store_id) {
+      fetchProductsForTransfer(transferForm.from_store_id);
+    }
+  }, [transferForm.from_store_id]);
+
+  const fetchProductsForTransfer = async (sourceStoreId) => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/products/${sourceStoreId}`);
+      setTransferProducts(res.data.products || []);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
+  };
+
   const openTransferModal = (preselectedFrom = '') => {
     setTransferForm({ from_store_id: preselectedFrom, to_store_id: '', product_id: '', quantity: 1, notes: '' });
-    setSourceProducts([]);
+    setTransferProducts([]);
     setTransferError('');
     setTransferSuccess('');
     setShowTransferModal(true);
-  };
-
-  const handleFromStoreChange = async (fromId) => {
-    setTransferForm(f => ({ ...f, from_store_id: fromId, product_id: '' }));
-    if (!fromId) { setSourceProducts([]); return; }
-    try {
-      const res = await axios.get(`${BACKEND_URL}/products/${fromId}`);
-      setSourceProducts(res.data.products || []);
-    } catch {
-      setSourceProducts([]);
-    }
   };
 
   const handleTransfer = async (e) => {
@@ -341,7 +345,7 @@ function Locations() {
             <form onSubmit={handleTransfer}>
               <div className="m-form-group">
                 <label className="m-label">From Location</label>
-                <select className="m-select" required value={transferForm.from_store_id} onChange={e => handleFromStoreChange(e.target.value)}>
+                <select className="m-select" required value={transferForm.from_store_id} onChange={e => setTransferForm({ ...transferForm, from_store_id: e.target.value, product_id: '' })}>
                   <option value="">Select source…</option>
                   {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
@@ -357,10 +361,10 @@ function Locations() {
               </div>
               <div className="m-form-group">
                 <label className="m-label">Product</label>
-                <select className="m-select" required value={transferForm.product_id} onChange={e => setTransferForm(f => ({ ...f, product_id: e.target.value }))} disabled={!sourceProducts.length}>
-                  <option value="">{transferForm.from_store_id ? 'Select product…' : 'Choose source first'}</option>
-                  {sourceProducts.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} ({p.quantity} in stock)</option>
+                <select className="m-select" required value={transferForm.product_id} onChange={e => setTransferForm({ ...transferForm, product_id: e.target.value })} disabled={!transferProducts.length}>
+                  <option value="">{transferForm.from_store_id ? '— Select Product —' : 'Choose source first'}</option>
+                  {transferProducts.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} (Stock: {p.quantity})</option>
                   ))}
                 </select>
               </div>
