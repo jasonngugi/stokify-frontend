@@ -35,6 +35,7 @@ function Locations() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferForm, setTransferForm] = useState({ from_store_id: '', to_store_id: '', product_id: '', quantity: 1, notes: '' });
   const [transferProducts, setTransferProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState('');
   const [transferSuccess, setTransferSuccess] = useState('');
@@ -60,7 +61,7 @@ function Locations() {
   const fetchTransfers = async () => {
     try {
       const res = await axios.get(`${BACKEND_URL}/stock-transfers/${storeId}`);
-      setTransfers(res.data.transfers || []);
+      setTransfers(res.data.transfers);
     } catch (err) {
       console.error('Error fetching transfers:', err);
     }
@@ -95,6 +96,7 @@ function Locations() {
   }, [transferForm.from_store_id]);
 
   const fetchProductsForTransfer = async (sourceStoreId) => {
+    console.log('Fetching products for store:', sourceStoreId);
     try {
       const res = await axios.get(`${BACKEND_URL}/products/${sourceStoreId}`);
       setTransferProducts(res.data.products || []);
@@ -106,9 +108,11 @@ function Locations() {
   const openTransferModal = (preselectedFrom = '') => {
     setTransferForm({ from_store_id: preselectedFrom, to_store_id: '', product_id: '', quantity: 1, notes: '' });
     setTransferProducts([]);
+    setProductSearch('');
     setTransferError('');
     setTransferSuccess('');
     setShowTransferModal(true);
+    if (preselectedFrom) fetchProductsForTransfer(preselectedFrom);
   };
 
   const handleTransfer = async (e) => {
@@ -137,6 +141,10 @@ function Locations() {
     stockValue: acc.stockValue + (loc.stockValue || 0),
     transactions: acc.transactions + (loc.transactions || 0),
   }), { revenue: 0, stockValue: 0, transactions: 0 });
+
+  const filteredTransferProducts = transferProducts.filter(p =>
+    p.name.toLowerCase().includes(productSearch.toLowerCase())
+  );
 
   const fmt = (n) => `KSh ${(Number(n) || 0).toLocaleString()}`;
 
@@ -369,9 +377,17 @@ function Locations() {
               </div>
               <div className="m-form-group">
                 <label className="m-label">Product</label>
+                <input
+                  className="m-input"
+                  style={{ marginBottom: '8px' }}
+                  placeholder="Search products..."
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  disabled={!transferProducts.length}
+                />
                 <select className="m-select" required value={transferForm.product_id} onChange={e => setTransferForm({ ...transferForm, product_id: e.target.value })} disabled={!transferProducts.length}>
                   <option value="">{transferForm.from_store_id ? '— Select Product —' : 'Choose source first'}</option>
-                  {transferProducts.map(p => (
+                  {filteredTransferProducts.map(p => (
                     <option key={p.id} value={p.id}>{p.name} (Stock: {p.quantity})</option>
                   ))}
                 </select>
