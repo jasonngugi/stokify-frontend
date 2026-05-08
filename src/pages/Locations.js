@@ -23,6 +23,7 @@ function Locations() {
 
   const [locations, setLocations] = useState([]);
   const [transfers, setTransfers] = useState([]);
+  const [comparison, setComparison] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Add branch modal
@@ -44,6 +45,7 @@ function Locations() {
     if (storeId) {
       fetchOverview();
       fetchTransfers();
+      fetchComparison();
     }
   }, [storeId]);
 
@@ -64,6 +66,15 @@ function Locations() {
       setTransfers(res.data.transfers);
     } catch (err) {
       console.error('Error fetching transfers:', err);
+    }
+  };
+
+  const fetchComparison = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/branch-comparison/${storeId}`);
+      setComparison(res.data.comparison || []);
+    } catch (err) {
+      console.error('Error fetching comparison:', err);
     }
   };
 
@@ -320,6 +331,98 @@ function Locations() {
             </div>
           </div>
         )}
+
+        {/* Branch Performance Comparison */}
+        {!loading && comparison.length > 1 && (() => {
+          const maxRevenue = Math.max(...comparison.map(c => c.revenue || 0), 1);
+          const maxGross = Math.max(...comparison.map(c => c.grossProfit || 0), 1);
+          const maxNet = Math.max(...comparison.map(c => c.netProfit || 0), 1);
+          const topRevId = comparison.reduce((a, b) => (b.revenue > a.revenue ? b : a), comparison[0])?.id;
+
+          const cols = [
+            { label: 'Revenue (30d)', key: 'revenue', fmt: true, max: maxRevenue },
+            { label: 'Gross Profit', key: 'grossProfit', fmt: true, max: maxGross },
+            { label: 'Net Profit', key: 'netProfit', fmt: true, max: maxNet },
+            { label: 'Transactions', key: 'transactions', fmt: false },
+            { label: 'Avg Order', key: 'avgOrderValue', fmt: true },
+            { label: 'Low Stock', key: 'lowStock', fmt: false, low: true },
+          ];
+
+          const bestCol = (key, low) => {
+            const vals = comparison.map(c => c[key] || 0);
+            return low ? Math.min(...vals) : Math.max(...vals);
+          };
+
+          return (
+            <div style={{ marginTop: '32px' }}>
+              <div className="section-title">📊 Branch Performance Comparison</div>
+
+              {/* Revenue bars */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
+                {comparison.map(c => (
+                  <div key={c.id} style={{ marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{c.name}</span>
+                        {c.id === topRevId && <span style={{ fontSize: '14px' }}>🏆</span>}
+                      </div>
+                      <span style={{ fontSize: '13px', color: '#00f5a0', fontWeight: 600 }}>
+                        KSh {(c.revenue || 0).toLocaleString()}
+                      </span>
+                    </div>
+                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '6px',
+                        background: c.id === topRevId ? '#00f5a0' : 'rgba(0,245,160,0.45)',
+                        borderRadius: '3px',
+                        width: `${((c.revenue || 0) / maxRevenue) * 100}%`,
+                        transition: 'width 0.4s ease',
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Comparison table */}
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '10px 12px', color: 'rgba(255,255,255,0.35)', fontWeight: 500, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px', borderBottom: '1px solid rgba(255,255,255,0.07)', whiteSpace: 'nowrap' }}>Branch</th>
+                      {cols.map(col => (
+                        <th key={col.key} style={{ textAlign: 'right', padding: '10px 12px', color: 'rgba(255,255,255,0.35)', fontWeight: 500, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px', borderBottom: '1px solid rgba(255,255,255,0.07)', whiteSpace: 'nowrap' }}>{col.label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparison.map((c, i) => (
+                      <tr key={c.id} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
+                        <td style={{ padding: '12px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: 'white', fontWeight: 600 }}>{c.name}</span>
+                            {c.id === topRevId && <span>🏆</span>}
+                            {!c.is_branch && <span style={{ fontSize: '10px', background: 'rgba(0,245,160,0.1)', color: '#00f5a0', padding: '1px 6px', borderRadius: '10px' }}>Main</span>}
+                          </div>
+                        </td>
+                        {cols.map(col => {
+                          const val = c[col.key] || 0;
+                          const best = bestCol(col.key, col.low);
+                          const isBest = val === best && best > 0;
+                          const display = col.fmt ? `KSh ${Math.round(val).toLocaleString()}` : val;
+                          return (
+                            <td key={col.key} style={{ padding: '12px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right', color: isBest ? '#00f5a0' : col.low && isBest ? '#ff4d4d' : 'rgba(255,255,255,0.7)', fontWeight: isBest ? 600 : 400, whiteSpace: 'nowrap' }}>
+                              {display}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Add Branch Modal */}

@@ -8,6 +8,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Staff() {
   const { storeId } = useStore();
   const [staff, setStaff] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -15,8 +16,20 @@ function Staff() {
   const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
-    if (storeId) fetchStaff();
+    if (storeId) {
+      fetchStaff();
+      fetchBranches();
+    }
   }, [storeId]);
+
+  const fetchBranches = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/branches/${storeId}`);
+      setBranches(res.data.branches || []);
+    } catch (err) {
+      console.error('Error fetching branches:', err);
+    }
+  };
 
   const fetchStaff = async () => {
     try {
@@ -77,6 +90,17 @@ function Staff() {
       fetchStaff();
     } catch (err) {
       console.error('Error removing staff:', err);
+    }
+  };
+
+  const assignBranch = async (userId, branchId) => {
+    try {
+      await axios.patch(`${BACKEND_URL}/staff/${userId}/branch`, {
+        branch_id: branchId || null,
+      });
+      fetchStaff();
+    } catch (err) {
+      console.error('Error assigning branch:', err);
     }
   };
 
@@ -181,9 +205,24 @@ function Staff() {
               const roleStyle = getRoleColor(member.role);
               return (
                 <div key={member.id} className="staff-card">
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="staff-name">{member.name || 'Staff Member'}</div>
                     <div className="staff-email">{member.email}</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>
+                      📍 {member.branch_id ? (branches.find(b => b.id === member.branch_id)?.name || 'Branch') : 'Main Store'}
+                    </div>
+                    {member.role !== 'owner' && branches.length > 0 && (
+                      <select
+                        value={member.branch_id || ''}
+                        onChange={e => assignBranch(member.id, e.target.value)}
+                        style={{ marginTop: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', padding: '6px 10px', fontFamily: 'DM Sans', fontSize: '12px', outline: 'none' }}
+                      >
+                        <option value="">— Main Store —</option>
+                        {branches.map(b => (
+                          <option key={b.id} value={b.id}>{b.name}{b.location ? ` (${b.location})` : ''}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <div className="staff-actions">
                     {member.role !== 'owner' ? (
