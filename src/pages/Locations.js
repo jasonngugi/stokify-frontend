@@ -121,16 +121,21 @@ function Locations() {
     setTransferError('');
     setTransferSuccess('');
     try {
+      console.log('Transfer form data:', transferForm);
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user?.id);
+
       await axios.post(`${BACKEND_URL}/stock-transfer`, {
         ...transferForm,
         quantity: parseInt(transferForm.quantity) || 1,
-        transferred_by: storeId,
+        transferred_by: user?.id,
       });
       setTransferSuccess('Stock transferred successfully!');
       fetchOverview();
       fetchTransfers();
       setTimeout(() => setShowTransferModal(false), 1200);
     } catch (err) {
+      console.error('Transfer error:', err);
       setTransferError(err.response?.data?.error || 'Transfer failed.');
     }
     setTransferLoading(false);
