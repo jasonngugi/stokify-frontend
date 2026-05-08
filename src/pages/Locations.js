@@ -279,23 +279,31 @@ function Locations() {
         )}
 
         {/* Transfer history */}
-        {transfers.length > 0 && (
+        {!loading && (
           <div style={{ marginTop: '32px' }}>
-            <div className="section-title">Recent Transfers</div>
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '4px 16px' }}>
-              {transfers.slice(0, 20).map((t, i) => (
-                <div key={i} className="transfer-row">
-                  <div>
-                    <div style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>{t.product_name}</div>
-                    <div className="transfer-meta">
-                      {locationName(t.from_store_id)} → {locationName(t.to_store_id)}
-                    </div>
-                    <div className="transfer-meta">{formatDate(t.transferred_at)}</div>
-                    {t.notes && <div className="transfer-meta" style={{ fontStyle: 'italic' }}>{t.notes}</div>}
-                  </div>
-                  <div className="transfer-qty">+{t.quantity} units</div>
+            <div className="section-title">📦 Transfer History</div>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', overflow: 'hidden' }}>
+              {transfers.length === 0 ? (
+                <div style={{ padding: '32px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>
+                  No stock transfers yet
                 </div>
-              ))}
+              ) : (
+                transfers.slice(0, 20).map((t, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' }}>
+                    <div>
+                      <div style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600, marginBottom: '3px' }}>{t.product_name}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginBottom: '2px' }}>
+                        {locationName(t.from_store_id)} → {locationName(t.to_store_id)}
+                      </div>
+                      <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>{formatDate(t.transferred_at)}</div>
+                      {t.notes && <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontStyle: 'italic', marginTop: '2px' }}>{t.notes}</div>}
+                    </div>
+                    <div style={{ background: 'rgba(0,245,160,0.1)', color: '#00f5a0', fontWeight: 700, fontSize: '12px', padding: '4px 10px', borderRadius: '20px', whiteSpace: 'nowrap', marginLeft: '12px', flexShrink: 0 }}>
+                      {t.quantity} units
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
