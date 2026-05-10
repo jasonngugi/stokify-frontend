@@ -101,7 +101,6 @@ function Navbar({ onLogout }) {
         zIndex: 100,
       }} ref={dropdownRef}>
 
-        {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
           <span style={{
             color: 'white',
@@ -117,7 +116,6 @@ function Navbar({ onLogout }) {
         {/* Desktop Nav */}
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }} className="desktop-nav">
 
-          {/* Dashboard */}
           <Link to="/" style={{
             color: location.pathname === '/' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
             textDecoration: 'none',
@@ -130,7 +128,6 @@ function Navbar({ onLogout }) {
             whiteSpace: 'nowrap',
           }}>Dashboard</Link>
 
-          {/* POS */}
           <Link to="/pos" style={{
             color: location.pathname === '/pos' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
             textDecoration: 'none',
@@ -139,12 +136,11 @@ function Navbar({ onLogout }) {
             fontWeight: location.pathname === '/pos' ? '600' : '400',
             padding: '6px 12px',
             borderRadius: '8px',
-            background: location.pathname === '/pos' ? 'rgba(0,245,160,0.08)' : 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: location.pathname === '/pos' ? 'rgba(0,245,160,0.08)' : 'rgba(0,245,160,0.05)',
+            border: '1px solid rgba(0,245,160,0.15)',
             whiteSpace: 'nowrap',
           }}>🖥️ POS</Link>
 
-          {/* Sales link for staff */}
           {!isOwner && (
             <Link to="/sales" style={{
               color: location.pathname === '/sales' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
@@ -157,7 +153,6 @@ function Navbar({ onLogout }) {
             }}>Sales</Link>
           )}
 
-          {/* Dropdown groups */}
           {navGroups.filter(g => !g.ownerOnly || isOwner).map((group) => (
             <div key={group.label} style={{ position: 'relative' }}>
               <button
@@ -220,7 +215,6 @@ function Navbar({ onLogout }) {
             </div>
           ))}
 
-          {/* AI Advisor */}
           {isOwner && (
             <Link to="/ai" style={{
               color: location.pathname === '/ai' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
@@ -236,10 +230,8 @@ function Navbar({ onLogout }) {
             }}>🤖 AI Advisor</Link>
           )}
 
-          {/* Notifications */}
           <Notifications />
 
-          {/* Logout */}
           <button onClick={onLogout} style={{
             background: 'transparent',
             color: 'rgba(255,255,255,0.5)',
@@ -254,8 +246,8 @@ function Navbar({ onLogout }) {
           }}>Logout</button>
         </div>
 
-        {/* Mobile actions (notifications + hamburger) */}
-        <div className="mobile-actions" style={{ display: 'none', alignItems: 'center', gap: '4px' }}>
+        {/* Mobile right side */}
+        <div style={{ display: 'none', alignItems: 'center', gap: '8px' }} className="mobile-actions">
           <Notifications />
           <button onClick={() => setMenuOpen(!menuOpen)} style={{
             background: 'transparent',
@@ -273,58 +265,42 @@ function Navbar({ onLogout }) {
       {menuOpen && (
         <div style={{
           background: 'rgba(10,10,20,0.98)',
-          padding: '12px 16px 100px',
+          padding: '12px 16px 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           position: 'sticky',
           top: '60px',
           zIndex: 99,
-          maxHeight: 'calc(100vh - 60px)',
+          maxHeight: '80vh',
           overflowY: 'auto',
         }}>
-          {/* POS — not in bottom nav */}
-          {mobileNavLink('/pos', '🖥️ POS')}
-
-          {/* Inventory group */}
-          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Inventory</div>
-          {isOwner && mobileNavLink('/categories', '📁 Categories')}
+          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '8px 12px 4px' }}>Inventory</div>
+          {mobileNavLink('/categories', '📁 Categories')}
           {mobileNavLink('/reorder', '🔄 Reorder')}
           {mobileNavLink('/expiry', '⏰ Expiry')}
           {mobileNavLink('/slowmoving', '📉 Slow Moving')}
 
-          {/* Finance group */}
-          {isOwner && (
-            <>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Finance</div>
-              {mobileNavLink('/history', '📋 Sales History')}
-              {mobileNavLink('/credit', '💳 Credit & Debt')}
-              {mobileNavLink('/expenses', '💸 Expenses')}
-              {mobileNavLink('/cashflow', '💹 Cash Flow')}
-              {mobileNavLink('/accounting', '📊 Accounting')}
-            </>
-          )}
+          {isOwner && <>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Finance</div>
+            {mobileNavLink('/sales', '💰 Sales')}
+            {mobileNavLink('/history', '📋 Sales History')}
+            {mobileNavLink('/credit', '💳 Credit & Debt')}
+            {mobileNavLink('/expenses', '💸 Expenses')}
+            {mobileNavLink('/cashflow', '💹 Cash Flow')}
+            {mobileNavLink('/accounting', '📊 Accounting')}
 
-          {/* Insights group */}
-          {isOwner && (
-            <>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Insights</div>
-              {mobileNavLink('/analytics', '📈 Analytics')}
-              {mobileNavLink('/daily', '📅 Daily Summary')}
-              {mobileNavLink('/reports', '📄 Reports')}
-              {mobileNavLink('/seasonal', '🌦 Seasonal')}
-            </>
-          )}
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Insights</div>
+            {mobileNavLink('/analytics', '📈 Analytics')}
+            {mobileNavLink('/daily', '📅 Daily Summary')}
+            {mobileNavLink('/reports', '📄 Reports')}
+            {mobileNavLink('/seasonal', '🌦 Seasonal')}
 
-          {/* Settings group */}
-          {isOwner && (
-            <>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Settings</div>
-              {mobileNavLink('/suppliers', '🏭 Suppliers')}
-              {mobileNavLink('/staff', '👥 Staff')}
-              {mobileNavLink('/payroll', '💰 Payroll')}
-              {mobileNavLink('/locations', '📍 Locations')}
-              {mobileNavLink('/account', '⚙️ Account')}
-            </>
-          )}
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Settings</div>
+            {mobileNavLink('/suppliers', '🏭 Suppliers')}
+            {mobileNavLink('/staff', '👥 Staff')}
+            {mobileNavLink('/payroll', '💵 Payroll')}
+            {mobileNavLink('/locations', '📍 Locations')}
+            {mobileNavLink('/account', '⚙️ Account Settings')}
+          </>}
 
           <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
             background: 'transparent',
@@ -336,7 +312,7 @@ function Navbar({ onLogout }) {
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '14px',
             width: '100%',
-            marginTop: '16px',
+            marginTop: '12px',
           }}>Logout</button>
         </div>
       )}
@@ -345,9 +321,6 @@ function Navbar({ onLogout }) {
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .mobile-actions { display: flex !important; }
-        }
-        @media (min-width: 769px) {
-          .mobile-actions { display: none !important; }
         }
       `}</style>
     </>
