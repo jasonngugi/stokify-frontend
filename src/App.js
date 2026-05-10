@@ -25,6 +25,7 @@ import Demo from './pages/Demo';
 import Accounting from './pages/Accounting';
 import POS from './pages/POS';
 import Locations from './pages/Locations';
+import Payroll from './pages/Payroll';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
@@ -90,6 +91,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/locations" element={<Locations />} />
+            <Route path="/payroll" element={<Payroll />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

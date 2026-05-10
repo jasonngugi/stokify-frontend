@@ -61,6 +61,7 @@ function Navbar({ onLogout }) {
       items: [
         { path: '/suppliers', label: 'Suppliers' },
         { path: '/staff', label: 'Staff' },
+        { path: '/payroll', label: 'Payroll' },
         { path: '/locations', label: 'Locations' },
         { path: '/account', label: 'Account Settings' },
       ]
@@ -319,6 +320,7 @@ function Navbar({ onLogout }) {
               <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 6px', fontFamily: '"DM Sans", sans-serif' }}>Settings</div>
               {mobileNavLink('/suppliers', '🏭 Suppliers')}
               {mobileNavLink('/staff', '👥 Staff')}
+              {mobileNavLink('/payroll', '💰 Payroll')}
               {mobileNavLink('/locations', '📍 Locations')}
               {mobileNavLink('/account', '⚙️ Account')}
             </>
