@@ -23,7 +23,7 @@ function Navbar({ onLogout }) {
 
   const navGroups = [
     {
-      label: '📦 Inventory',
+      label: 'Inventory',
       ownerOnly: false,
       items: [
         { path: '/products', label: 'Products' },
@@ -34,7 +34,7 @@ function Navbar({ onLogout }) {
       ]
     },
     {
-      label: '💰 Finance',
+      label: 'Finance',
       ownerOnly: true,
       items: [
         { path: '/sales', label: 'Sales' },
@@ -46,7 +46,7 @@ function Navbar({ onLogout }) {
       ]
     },
     {
-      label: '📊 Insights',
+      label: 'Insights',
       ownerOnly: true,
       items: [
         { path: '/analytics', label: 'Analytics' },
@@ -56,7 +56,7 @@ function Navbar({ onLogout }) {
       ]
     },
     {
-      label: '⚙️ Settings',
+      label: 'Settings',
       ownerOnly: true,
       items: [
         { path: '/suppliers', label: 'Suppliers' },
