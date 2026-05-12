@@ -1,92 +1,194 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../storeContext';
 import Notifications from './Notifications';
 
-function Navbar({ onLogout }) {
-  const location = useLocation();
-  const { role } = useStore();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const dropdownRef = useRef(null);
-  const isOwner = role === 'owner';
+const NAV_GROUPS = [
+  {
+    label: 'Inventory',
+    ownerOnly: false,
+    items: [
+      { path: '/products',   label: 'Products' },
+      { path: '/categories', label: 'Categories', ownerOnly: true },
+      { path: '/reorder',    label: 'Reorder' },
+      { path: '/expiry',     label: 'Expiry' },
+      { path: '/slowmoving', label: 'Slow Moving' },
+    ],
+  },
+  {
+    label: 'Finance',
+    ownerOnly: true,
+    items: [
+      { path: '/sales',       label: 'Sales' },
+      { path: '/history',     label: 'History' },
+      { path: '/credit',      label: 'Credit & Debt' },
+      { path: '/expenses',    label: 'Expenses' },
+      { path: '/cashflow',    label: 'Cash Flow' },
+      { path: '/accounting',  label: 'Accounting' },
+      { path: '/vat',         label: 'VAT' },
+      { path: '/invoices',         label: 'Invoices' },
+      { path: '/purchase-orders', label: 'Purchase Orders' },
+    ],
+  },
+  {
+    label: 'Insights',
+    ownerOnly: true,
+    items: [
+      { path: '/analytics', label: 'Analytics' },
+      { path: '/daily',     label: 'Daily Summary' },
+      { path: '/reports',   label: 'Reports' },
+      { path: '/seasonal',  label: 'Seasonal' },
+    ],
+  },
+  {
+    label: 'Settings',
+    ownerOnly: true,
+    items: [
+      { path: '/suppliers', label: 'Suppliers' },
+      { path: '/staff',     label: 'Staff' },
+      { path: '/payroll',   label: 'Payroll' },
+      { path: '/locations', label: 'Locations' },
+      { path: '/account',   label: 'Account Settings' },
+    ],
+  },
+];
+
+const STANDALONE_LINKS = [
+  { path: '/',    label: 'Dashboard', ownerOnly: false },
+  { path: '/pos', label: 'POS',       ownerOnly: false },
+  { path: '/ai',  label: 'AI Advisor', ownerOnly: true },
+];
+
+// ── NavDropdown ────────────────────────────────────────────────────────────────
+
+function NavDropdown({ group, isOwner, currentPath }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setActiveDropdown(null);
-      }
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const navGroups = [
-    {
-      label: 'Inventory',
-      ownerOnly: false,
-      items: [
-        { path: '/products', label: 'Products' },
-        { path: '/categories', label: 'Categories', ownerOnly: true },
-        { path: '/reorder', label: 'Reorder' },
-        { path: '/expiry', label: 'Expiry' },
-        { path: '/slowmoving', label: 'Slow Moving' },
-      ]
-    },
-    {
-      label: 'Finance',
-      ownerOnly: true,
-      items: [
-        { path: '/sales', label: 'Sales' },
-        { path: '/history', label: 'History' },
-        { path: '/credit', label: 'Credit & Debt' },
-        { path: '/expenses', label: 'Expenses' },
-        { path: '/cashflow', label: 'Cash Flow' },
-        { path: '/accounting', label: 'Accounting' },
-      ]
-    },
-    {
-      label: 'Insights',
-      ownerOnly: true,
-      items: [
-        { path: '/analytics', label: 'Analytics' },
-        { path: '/daily', label: 'Daily Summary' },
-        { path: '/reports', label: 'Reports' },
-        { path: '/seasonal', label: 'Seasonal Trends' },
-      ]
-    },
-    {
-      label: 'Settings',
-      ownerOnly: true,
-      items: [
-        { path: '/suppliers', label: 'Suppliers' },
-        { path: '/staff', label: 'Staff' },
-        { path: '/payroll', label: 'Payroll' },
-        { path: '/locations', label: 'Locations' },
-        { path: '/account', label: 'Account Settings' },
-      ]
-    },
-  ];
+  const visibleItems = group.items.filter(item => !item.ownerOnly || isOwner);
+  const groupActive = visibleItems.some(item => currentPath === item.path);
 
-  const isGroupActive = (group) => group.items.some(item => location.pathname === item.path);
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: groupActive ? 'rgba(0,245,160,0.08)' : 'transparent',
+          border: 'none',
+          color: groupActive ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+          fontSize: '13px',
+          fontFamily: '"DM Sans", sans-serif',
+          fontWeight: groupActive ? 600 : 400,
+          padding: '6px 12px',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {group.label}
+        <span style={{ fontSize: '9px', opacity: 0.5, marginTop: '1px' }}>{open ? '▲' : '▼'}</span>
+      </button>
 
-  const mobileNavLink = (to, label) => (
-    <Link key={to} to={to} onClick={() => setMenuOpen(false)} style={{
-      color: location.pathname === to ? '#00f5a0' : 'rgba(255,255,255,0.7)',
-      textDecoration: 'none',
-      fontSize: '14px',
+      {open && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 4px)',
+          left: 0,
+          background: 'rgba(10,10,20,0.98)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '12px',
+          padding: '6px',
+          minWidth: '180px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          zIndex: 200,
+        }}>
+          {visibleItems.map(item => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setOpen(false)}
+              style={{
+                display: 'block',
+                padding: '9px 14px',
+                color: currentPath === item.path ? '#00f5a0' : 'rgba(255,255,255,0.7)',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: currentPath === item.path ? 600 : 400,
+                borderRadius: '8px',
+                background: currentPath === item.path ? 'rgba(0,245,160,0.08)' : 'transparent',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Navbar ─────────────────────────────────────────────────────────────────────
+
+function Navbar({ onLogout }) {
+  const { pathname } = useLocation();
+  const { role } = useStore();
+  const isOwner = role === 'owner';
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const linkStyle = (path) => ({
+    color: pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.6)',
+    textDecoration: 'none',
+    fontSize: '13px',
+    fontFamily: '"DM Sans", sans-serif',
+    fontWeight: pathname === path ? 600 : 400,
+    padding: '6px 12px',
+    borderRadius: '8px',
+    background: pathname === path ? 'rgba(0,245,160,0.08)' : 'transparent',
+    whiteSpace: 'nowrap',
+  });
+
+  const mobileLinkStyle = (path) => ({
+    display: 'block',
+    padding: '10px 12px',
+    color: pathname === path ? '#00f5a0' : 'rgba(255,255,255,0.75)',
+    textDecoration: 'none',
+    fontSize: '14px',
+    fontFamily: '"DM Sans", sans-serif',
+    fontWeight: pathname === path ? 600 : 400,
+    borderRadius: '8px',
+    background: pathname === path ? 'rgba(0,245,160,0.08)' : 'transparent',
+  });
+
+  const sectionLabel = (text) => (
+    <div style={{
+      color: 'rgba(255,255,255,0.28)',
+      fontSize: '10px',
+      letterSpacing: '1.2px',
+      textTransform: 'uppercase',
+      padding: '12px 12px 4px',
       fontFamily: '"DM Sans", sans-serif',
-      fontWeight: location.pathname === to ? '600' : '400',
-      padding: '10px 12px',
-      display: 'block',
-      borderRadius: '8px',
-      background: location.pathname === to ? 'rgba(0,245,160,0.08)' : 'transparent',
-    }}>{label}</Link>
+    }}>
+      {text}
+    </div>
   );
 
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
       <nav style={{
         background: 'rgba(10,10,20,0.95)',
         backdropFilter: 'blur(20px)',
@@ -99,221 +201,116 @@ function Navbar({ onLogout }) {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-      }} ref={dropdownRef}>
-
+      }}>
+        {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <span style={{
-            color: 'white',
-            fontFamily: '"Syne", sans-serif',
-            fontWeight: '800',
-            fontSize: '20px',
-            letterSpacing: '-0.5px',
-          }}>
+          <span style={{ color: 'white', fontFamily: '"Syne", sans-serif', fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px' }}>
             STOK<span style={{ color: '#00f5a0' }}>IFY</span>
           </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }} className="desktop-nav">
-
-          <Link to="/" style={{
-            color: location.pathname === '/' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-            textDecoration: 'none',
-            fontSize: '13px',
-            fontFamily: '"DM Sans", sans-serif',
-            fontWeight: location.pathname === '/' ? '600' : '400',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            background: location.pathname === '/' ? 'rgba(0,245,160,0.08)' : 'transparent',
-            whiteSpace: 'nowrap',
-          }}>Dashboard</Link>
-
-          <Link to="/pos" style={{
-            color: location.pathname === '/pos' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-            textDecoration: 'none',
-            fontSize: '13px',
-            fontFamily: '"DM Sans", sans-serif',
-            fontWeight: location.pathname === '/pos' ? '600' : '400',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            background: location.pathname === '/pos' ? 'rgba(0,245,160,0.08)' : 'rgba(0,245,160,0.05)',
-            border: '1px solid rgba(0,245,160,0.15)',
-            whiteSpace: 'nowrap',
-          }}>🖥️ POS</Link>
-
-          {!isOwner && (
-            <Link to="/sales" style={{
-              color: location.pathname === '/sales' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-              textDecoration: 'none',
-              fontSize: '13px',
-              fontFamily: '"DM Sans", sans-serif',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              whiteSpace: 'nowrap',
-            }}>Sales</Link>
-          )}
-
-          {navGroups.filter(g => !g.ownerOnly || isOwner).map((group) => (
-            <div key={group.label} style={{ position: 'relative' }}>
-              <button
-                onClick={() => setActiveDropdown(activeDropdown === group.label ? null : group.label)}
-                style={{
-                  background: isGroupActive(group) ? 'rgba(0,245,160,0.08)' : 'transparent',
-                  border: 'none',
-                  color: isGroupActive(group) ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-                  fontSize: '13px',
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontWeight: isGroupActive(group) ? '600' : '400',
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  whiteSpace: 'nowrap',
-                }}>
-                {group.label}
-                <span style={{ fontSize: '10px', opacity: 0.6 }}>▾</span>
-              </button>
-
-              {activeDropdown === group.label && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  background: 'rgba(10,10,20,0.98)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  padding: '8px',
-                  minWidth: '180px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                  zIndex: 200,
-                  marginTop: '4px',
-                }}>
-                  {group.items
-                    .filter(item => !item.ownerOnly || isOwner)
-                    .map(item => (
-                      <Link key={item.path} to={item.path}
-                        onClick={() => setActiveDropdown(null)}
-                        style={{
-                          display: 'block',
-                          padding: '10px 14px',
-                          color: location.pathname === item.path ? '#00f5a0' : 'rgba(255,255,255,0.7)',
-                          textDecoration: 'none',
-                          fontSize: '13px',
-                          fontFamily: '"DM Sans", sans-serif',
-                          fontWeight: location.pathname === item.path ? '600' : '400',
-                          borderRadius: '8px',
-                          background: location.pathname === item.path ? 'rgba(0,245,160,0.08)' : 'transparent',
-                          whiteSpace: 'nowrap',
-                        }}>
-                        {item.label}
-                      </Link>
-                    ))}
-                </div>
-              )}
-            </div>
+        {/* Desktop nav */}
+        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+          {/* Standalone links */}
+          {STANDALONE_LINKS.filter(l => !l.ownerOnly || isOwner).map(l => (
+            <Link key={l.path} to={l.path} style={linkStyle(l.path)}>{l.label}</Link>
           ))}
 
-          {isOwner && (
-            <Link to="/ai" style={{
-              color: location.pathname === '/ai' ? '#00f5a0' : 'rgba(255,255,255,0.6)',
-              textDecoration: 'none',
-              fontSize: '13px',
-              fontFamily: '"DM Sans", sans-serif',
-              fontWeight: location.pathname === '/ai' ? '600' : '400',
+          {/* Group dropdowns */}
+          {NAV_GROUPS.filter(g => !g.ownerOnly || isOwner).map(group => (
+            <NavDropdown key={group.label} group={group} isOwner={isOwner} currentPath={pathname} />
+          ))}
+
+          <Notifications />
+
+          <button
+            onClick={onLogout}
+            style={{
+              background: 'transparent',
+              color: 'rgba(255,255,255,0.5)',
+              border: '1px solid rgba(255,255,255,0.15)',
               padding: '6px 12px',
               borderRadius: '8px',
-              background: location.pathname === '/ai' ? 'rgba(0,245,160,0.08)' : 'rgba(0,245,160,0.05)',
-              border: '1px solid rgba(0,245,160,0.15)',
+              cursor: 'pointer',
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: '13px',
               whiteSpace: 'nowrap',
-            }}>🤖 AI Advisor</Link>
-          )}
-
-          <Notifications />
-
-          <button onClick={onLogout} style={{
-            background: 'transparent',
-            color: 'rgba(255,255,255,0.5)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: '13px',
-            whiteSpace: 'nowrap',
-            marginLeft: '4px',
-          }}>Logout</button>
+              marginLeft: '4px',
+            }}
+          >
+            Logout
+          </button>
         </div>
 
-        {/* Mobile right side */}
-        <div style={{ display: 'none', alignItems: 'center', gap: '8px' }} className="mobile-actions">
+        {/* Mobile right */}
+        <div className="mobile-actions" style={{ display: 'none', alignItems: 'center', gap: '6px' }}>
           <Notifications />
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontSize: '22px',
-            cursor: 'pointer',
-          }}>
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '22px', cursor: 'pointer', lineHeight: 1 }}
+          >
             {menuOpen ? '✕' : '☰'}
           </button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile drawer */}
       {menuOpen && (
         <div style={{
           background: 'rgba(10,10,20,0.98)',
-          padding: '12px 16px 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
+          padding: '8px 16px 100px',
           position: 'sticky',
           top: '60px',
           zIndex: 99,
-          maxHeight: '80vh',
+          maxHeight: 'calc(100vh - 60px)',
           overflowY: 'auto',
         }}>
-          <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '8px 12px 4px' }}>Inventory</div>
-          {mobileNavLink('/categories', '📁 Categories')}
-          {mobileNavLink('/reorder', '🔄 Reorder')}
-          {mobileNavLink('/expiry', '⏰ Expiry')}
-          {mobileNavLink('/slowmoving', '📉 Slow Moving')}
+          <Link to="/pos" onClick={() => setMenuOpen(false)} style={mobileLinkStyle('/pos')}>POS</Link>
 
-          {isOwner && <>
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Finance</div>
-            {mobileNavLink('/sales', '💰 Sales')}
-            {mobileNavLink('/history', '📋 Sales History')}
-            {mobileNavLink('/credit', '💳 Credit & Debt')}
-            {mobileNavLink('/expenses', '💸 Expenses')}
-            {mobileNavLink('/cashflow', '💹 Cash Flow')}
-            {mobileNavLink('/accounting', '📊 Accounting')}
+          {sectionLabel('Inventory')}
+          {NAV_GROUPS[0].items.filter(i => !i.ownerOnly || isOwner).map(i => (
+            <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
+          ))}
 
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Insights</div>
-            {mobileNavLink('/analytics', '📈 Analytics')}
-            {mobileNavLink('/daily', '📅 Daily Summary')}
-            {mobileNavLink('/reports', '📄 Reports')}
-            {mobileNavLink('/seasonal', '🌦 Seasonal')}
+          {isOwner && (
+            <>
+              {sectionLabel('Finance')}
+              {NAV_GROUPS[1].items.map(i => (
+                <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
+              ))}
 
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', padding: '12px 12px 4px' }}>Settings</div>
-            {mobileNavLink('/suppliers', '🏭 Suppliers')}
-            {mobileNavLink('/staff', '👥 Staff')}
-            {mobileNavLink('/payroll', '💵 Payroll')}
-            {mobileNavLink('/locations', '📍 Locations')}
-            {mobileNavLink('/account', '⚙️ Account Settings')}
-          </>}
+              {sectionLabel('Insights')}
+              {NAV_GROUPS[2].items.map(i => (
+                <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
+              ))}
 
-          <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{
-            background: 'transparent',
-            color: '#ff4d4d',
-            border: '1px solid rgba(255,77,77,0.3)',
-            padding: '10px 16px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: '14px',
-            width: '100%',
-            marginTop: '12px',
-          }}>Logout</button>
+              {sectionLabel('Settings')}
+              {NAV_GROUPS[3].items.map(i => (
+                <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
+              ))}
+
+              <Link to="/ai" onClick={() => setMenuOpen(false)} style={mobileLinkStyle('/ai')}>AI Advisor</Link>
+            </>
+          )}
+
+          <button
+            onClick={() => { onLogout(); setMenuOpen(false); }}
+            style={{
+              background: 'transparent',
+              color: '#ff4d4d',
+              border: '1px solid rgba(255,77,77,0.3)',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: '14px',
+              width: '100%',
+              marginTop: '16px',
+            }}
+          >
+            Logout
+          </button>
         </div>
       )}
 

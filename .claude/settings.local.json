@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node index.js)",
+      "Bash(curl -s -o /tmp/po.json -w \"%{http_code}\" http://localhost:5000/purchase-orders/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /tmp/inv.json -w \"%{http_code}\" http://localhost:5000/invoices/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" http://localhost:5000/purchase-orders/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" http://localhost:5000/invoices/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" http://localhost:5000/vat/config/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(pkill -f \"node index.js\")",
+      "Bash(curl -s http://localhost:5000/debug/tables)",
+      "Bash(curl -s http://localhost:5000/)",
+      "Bash(curl -v http://localhost:5000/debug/tables)",
+      "Bash(git add *)"
+    ]
+  }
+}

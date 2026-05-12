@@ -26,6 +26,9 @@ import Accounting from './pages/Accounting';
 import POS from './pages/POS';
 import Locations from './pages/Locations';
 import Payroll from './pages/Payroll';
+import VAT from './pages/VAT';
+import Invoices from './pages/Invoices';
+import PurchaseOrders from './pages/PurchaseOrders';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
@@ -92,6 +95,9 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/locations" element={<Locations />} />
             <Route path="/payroll" element={<Payroll />} />
+            <Route path="/vat" element={<VAT />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/purchase-orders" element={<PurchaseOrders />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>
