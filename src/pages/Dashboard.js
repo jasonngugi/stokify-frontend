@@ -7,7 +7,8 @@ import { supabase } from '../supabaseClient';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Dashboard() {
-  const { storeId } = useStore();
+  const { storeId, role } = useStore();
+  const isOwner = role === 'owner';
   const [products, setProducts] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +18,8 @@ function Dashboard() {
   const [storeName, setStoreName] = useState('');
   const [todayRevenue, setTodayRevenue] = useState(null);
   const [todaySales, setTodaySales] = useState(null);
+  const [followups, setFollowups] = useState([]);
+  const [showFollowups, setShowFollowups] = useState(false);
 
   useEffect(() => {
     if (storeId) fetchProducts();
@@ -55,6 +58,26 @@ function Dashboard() {
     };
     fetchMeta();
   }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const fetchFollowups = async () => {
+      try {
+        // Determine whether to show widget: owners always, staff only if can_see_followups
+        if (!isOwner) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          const staffRes = await axios.get(`${BACKEND_URL}/staff/${storeId}`);
+          const me = (staffRes.data.staff || []).find(s => s.id === user.id);
+          if (!me?.crm_permissions?.can_see_followups) return;
+        }
+        const res = await axios.get(`${BACKEND_URL}/customers/${storeId}/followups`);
+        setFollowups(res.data.customers || []);
+        setShowFollowups(true);
+      } catch (_) {}
+    };
+    fetchFollowups();
+  }, [storeId, isOwner]);
 
 
   const fetchProducts = async () => {
@@ -200,6 +223,34 @@ function Dashboard() {
             </Link>
           ))}
         </div>
+
+        {/* Follow-ups widget */}
+        {showFollowups && (
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontFamily: '"Syne", sans-serif', fontWeight: 700, fontSize: '14px', color: 'white' }}>Follow-ups Due</span>
+              <Link to="/customers" style={{ fontSize: '12px', color: '#00f5a0', textDecoration: 'none' }}>View all</Link>
+            </div>
+            {followups.length === 0 ? (
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>No follow-ups due</div>
+            ) : (
+              followups.slice(0, 5).map(c => {
+                const overdue = c.followup_date < new Date().toISOString().split('T')[0];
+                return (
+                  <Link key={c.id} to={`/customers/${c.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', textDecoration: 'none' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', color: 'white', fontWeight: 500 }}>{c.name}</div>
+                      {c.followup_note && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{c.followup_note}</div>}
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: overdue ? '#ff6b6b' : '#ffc800', whiteSpace: 'nowrap', marginLeft: '12px' }}>
+                      {new Date(c.followup_date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </Link>
+                );
+              })
+            )}
+          </div>
+        )}
 
         <div className="subtitle-row" style={{ marginBottom: '16px' }}>
           <button className="refresh-btn" onClick={fetchProducts}>↻</button>

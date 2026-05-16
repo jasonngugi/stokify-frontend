@@ -41,6 +41,13 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'CRM',
+    ownerOnly: false,
+    items: [
+      { path: '/customers', label: 'Customers', ownerOnly: false },
+    ],
+  },
+  {
     label: 'Settings',
     ownerOnly: true,
     items: [
@@ -273,6 +280,11 @@ function Navbar({ onLogout }) {
             <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
           ))}
 
+          {sectionLabel('CRM')}
+          {NAV_GROUPS[3].items.filter(i => !i.ownerOnly || isOwner).map(i => (
+            <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
+          ))}
+
           {isOwner && (
             <>
               {sectionLabel('Finance')}
@@ -286,7 +298,7 @@ function Navbar({ onLogout }) {
               ))}
 
               {sectionLabel('Settings')}
-              {NAV_GROUPS[3].items.map(i => (
+              {NAV_GROUPS[4].items.map(i => (
                 <Link key={i.path} to={i.path} onClick={() => setMenuOpen(false)} style={mobileLinkStyle(i.path)}>{i.label}</Link>
               ))}
 

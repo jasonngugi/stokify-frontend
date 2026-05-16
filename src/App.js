@@ -29,6 +29,8 @@ import Payroll from './pages/Payroll';
 import VAT from './pages/VAT';
 import Invoices from './pages/Invoices';
 import PurchaseOrders from './pages/PurchaseOrders';
+import Customers from './pages/Customers';
+import CustomerProfile from './pages/CustomerProfile';
 import AccountSettings from './pages/AccountSettings';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
@@ -98,6 +100,8 @@ function App() {
             <Route path="/vat" element={<VAT />} />
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/purchase-orders" element={<PurchaseOrders />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/customers/:id" element={<CustomerProfile />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

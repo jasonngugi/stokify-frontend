@@ -5,6 +5,8 @@ import { supabase } from '../supabaseClient';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+const DEFAULT_CRM_PERMS = { can_see_contacts: false, can_see_financials: false, can_edit_customers: false, can_see_followups: false };
+
 function Staff() {
   const { storeId } = useStore();
   const [staff, setStaff] = useState([]);
@@ -14,6 +16,9 @@ function Staff() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [crmEditingId, setCrmEditingId] = useState(null);
+  const [crmForm, setCrmForm] = useState(DEFAULT_CRM_PERMS);
+  const [crmSaving, setCrmSaving] = useState(false);
 
   useEffect(() => {
     if (storeId) {
@@ -91,6 +96,23 @@ function Staff() {
     } catch (err) {
       console.error('Error removing staff:', err);
     }
+  };
+
+  const openCrmPerms = (member) => {
+    setCrmEditingId(member.id);
+    setCrmForm({ ...DEFAULT_CRM_PERMS, ...(member.crm_permissions || {}) });
+  };
+
+  const saveCrmPerms = async (userId) => {
+    setCrmSaving(true);
+    try {
+      await axios.patch(`${BACKEND_URL}/staff/${userId}/profile`, { crm_permissions: crmForm });
+      setCrmEditingId(null);
+      fetchStaff();
+    } catch (err) {
+      console.error('Error saving CRM permissions:', err);
+    }
+    setCrmSaving(false);
   };
 
   const assignBranch = async (userId, branchId) => {
@@ -222,6 +244,46 @@ function Staff() {
                           <option key={b.id} value={b.id}>{b.name}{b.location ? ` (${b.location})` : ''}</option>
                         ))}
                       </select>
+                    )}
+
+                    {/* CRM Permissions */}
+                    {member.role !== 'owner' && (
+                      <div style={{ marginTop: '10px' }}>
+                        {crmEditingId !== member.id ? (
+                          <button onClick={() => openCrmPerms(member)} style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)', padding: '5px 12px', borderRadius: '7px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '12px' }}>
+                            CRM Permissions
+                          </button>
+                        ) : (
+                          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', marginTop: '4px' }}>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '10px' }}>CRM Permissions</div>
+                            {[
+                              { key: 'can_see_contacts',   label: 'View customer contact details' },
+                              { key: 'can_see_financials', label: 'View financial info' },
+                              { key: 'can_edit_customers', label: 'Add and edit customers' },
+                              { key: 'can_see_followups',  label: 'View and manage follow-ups' },
+                            ].map(p => (
+                              <div key={p.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>{p.label}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setCrmForm(f => ({ ...f, [p.key]: !f[p.key] }))}
+                                  style={{ width: '38px', height: '20px', borderRadius: '10px', border: 'none', cursor: 'pointer', position: 'relative', background: crmForm[p.key] ? '#00f5a0' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s', flexShrink: 0 }}
+                                >
+                                  <span style={{ position: 'absolute', top: '3px', width: '14px', height: '14px', background: 'white', borderRadius: '50%', transition: 'left 0.2s', left: crmForm[p.key] ? '21px' : '3px' }} />
+                                </button>
+                              </div>
+                            ))}
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                              <button onClick={() => saveCrmPerms(member.id)} disabled={crmSaving} style={{ flex: 1, padding: '7px', background: '#00f5a0', color: '#080810', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 600 }}>
+                                {crmSaving ? 'Saving...' : 'Save'}
+                              </button>
+                              <button onClick={() => setCrmEditingId(null)} style={{ padding: '7px 14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', borderRadius: '8px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '12px' }}>
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="staff-actions">
