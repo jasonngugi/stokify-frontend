@@ -26,10 +26,15 @@ function Notifications() {
 
   const fetchNotifications = async () => {
     try {
-      const [productsRes, expiryRes, creditRes] = await Promise.all([
+      const today = new Date().toISOString().split('T')[0];
+
+      const [productsRes, expiryRes, creditRes, invoicesRes, poRes, followupsRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/products/${storeId}`),
         axios.get(`${BACKEND_URL}/expiry/${storeId}`),
         axios.get(`${BACKEND_URL}/credit/${storeId}`),
+        axios.get(`${BACKEND_URL}/invoices/${storeId}`),
+        axios.get(`${BACKEND_URL}/purchase-orders/${storeId}`),
+        axios.get(`${BACKEND_URL}/customers/${storeId}/followups`),
       ]);
 
       const items = [];
@@ -40,7 +45,7 @@ function Notifications() {
       lowStock.forEach(p => {
         items.push({
           type: 'lowstock',
-          text: `⚠ ${p.name} is running low — only ${p.quantity} units left`,
+          text: `${p.name} is running low — only ${p.quantity} units left`,
           link: '/reorder',
           color: '#ffc800',
           bg: 'rgba(255,200,0,0.06)',
@@ -49,17 +54,16 @@ function Notifications() {
 
       // Expiry within 7 days
       const expiryProducts = expiryRes.data.products || [];
-      const today = new Date();
-      const soon = expiryProducts.filter(p => {
+      const soonExpiry = expiryProducts.filter(p => {
         if (!p.expiry_date) return false;
-        const days = Math.ceil((new Date(p.expiry_date) - today) / (1000 * 60 * 60 * 24));
+        const days = Math.ceil((new Date(p.expiry_date) - new Date()) / (1000 * 60 * 60 * 24));
         return days <= 7;
       });
-      soon.forEach(p => {
-        const days = Math.ceil((new Date(p.expiry_date) - today) / (1000 * 60 * 60 * 24));
+      soonExpiry.forEach(p => {
+        const days = Math.ceil((new Date(p.expiry_date) - new Date()) / (1000 * 60 * 60 * 24));
         items.push({
           type: 'expiry',
-          text: `🕐 ${p.name} expires in ${days <= 0 ? 'today or has expired' : `${days} day${days === 1 ? '' : 's'}`}`,
+          text: `${p.name} expires in ${days <= 0 ? 'today or has expired' : `${days} day${days === 1 ? '' : 's'}`}`,
           link: '/expiry',
           color: '#ff4d4d',
           bg: 'rgba(255,77,77,0.06)',
@@ -73,12 +77,50 @@ function Notifications() {
         const total = outstanding.reduce((sum, c) => sum + (c.total_amount || c.total_price || 0), 0);
         items.push({
           type: 'credit',
-          text: `💳 Outstanding credit: KSh ${total.toLocaleString()} from ${outstanding.length} customer${outstanding.length === 1 ? '' : 's'}`,
+          text: `Outstanding credit: KSh ${total.toLocaleString()} from ${outstanding.length} customer${outstanding.length === 1 ? '' : 's'}`,
           link: '/credit',
           color: '#ff8c42',
           bg: 'rgba(255,140,66,0.06)',
         });
       }
+
+      // Overdue invoices
+      const invoices = invoicesRes.data.invoices || [];
+      const overdueInvoices = invoices.filter(inv => inv.status === 'unpaid' && inv.due_date && inv.due_date < today);
+      overdueInvoices.forEach(inv => {
+        items.push({
+          type: 'invoice',
+          text: `Invoice ${inv.invoice_number} overdue - ${inv.customer_name}`,
+          link: '/invoices',
+          color: '#c0392b',
+          bg: 'rgba(192,57,43,0.07)',
+        });
+      });
+
+      // Overdue purchase orders
+      const pos = poRes.data.purchase_orders || [];
+      const overduePOs = pos.filter(po => po.status === 'sent' && po.expected_date && po.expected_date < today);
+      overduePOs.forEach(po => {
+        items.push({
+          type: 'po',
+          text: `PO ${po.po_number} not received - ${po.supplier_name}`,
+          link: '/purchase-orders',
+          color: '#8e44ad',
+          bg: 'rgba(142,68,173,0.07)',
+        });
+      });
+
+      // Follow-ups due
+      const followups = followupsRes.data.customers || [];
+      followups.forEach(c => {
+        items.push({
+          type: 'followup',
+          text: `Follow up: ${c.name} - ${c.followup_note || 'No note'}`,
+          link: `/customers/${c.id}`,
+          color: '#2980b9',
+          bg: 'rgba(41,128,185,0.07)',
+        });
+      });
 
       setNotifications(items);
     } catch (err) {
@@ -133,7 +175,7 @@ function Notifications() {
       }
     `}</style>
     <div className="notifications-wrapper" style={{ position: 'relative' }}>
-      {/* BELL BUTTON */}
+      {/* Bell button */}
       <button
         onClick={() => setOpen(o => !o)}
         style={{
@@ -174,10 +216,9 @@ function Notifications() {
         )}
       </button>
 
-      {/* DROPDOWN */}
+      {/* Dropdown */}
       {open && (
         <div className="notifications-dropdown">
-          {/* Header */}
           <div style={{
             padding: '14px 16px',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
@@ -193,9 +234,8 @@ function Notifications() {
             )}
           </div>
 
-          {/* Items */}
           {loading ? (
-            <div style={{ padding: '20px 16px', color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>Loading…</div>
+            <div style={{ padding: '20px 16px', color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>Loading...</div>
           ) : count === 0 ? (
             <div style={{ padding: '24px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>✅</div>
@@ -218,7 +258,6 @@ function Notifications() {
             ))
           )}
 
-          {/* Footer */}
           {count > 0 && (
             <div style={{ padding: '10px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
               <Link
@@ -226,7 +265,7 @@ function Notifications() {
                 onClick={() => setOpen(false)}
                 style={{ color: '#00f5a0', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
               >
-                View All Alerts →
+                View All Alerts
               </Link>
             </div>
           )}
