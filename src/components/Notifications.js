@@ -28,7 +28,7 @@ function Notifications() {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      const [productsRes, expiryRes, creditRes, invoicesRes, poRes, followupsRes] = await Promise.all([
+      const [productsRes, expiryRes, creditRes, invoicesRes, poRes, followupsRes] = await Promise.allSettled([
         axios.get(`${BACKEND_URL}/products/${storeId}`),
         axios.get(`${BACKEND_URL}/expiry/${storeId}`),
         axios.get(`${BACKEND_URL}/credit/${storeId}`),
@@ -40,7 +40,7 @@ function Notifications() {
       const items = [];
 
       // Low stock
-      const products = productsRes.data.products || [];
+      const products = productsRes.status === 'fulfilled' ? productsRes.value.data.products || [] : [];
       const lowStock = products.filter(p => p.quantity <= (p.low_stock_threshold || 5));
       lowStock.forEach(p => {
         items.push({
@@ -53,7 +53,7 @@ function Notifications() {
       });
 
       // Expiry within 7 days
-      const expiryProducts = expiryRes.data.products || [];
+      const expiryProducts = expiryRes.status === 'fulfilled' ? expiryRes.value.data.products || [] : [];
       const soonExpiry = expiryProducts.filter(p => {
         if (!p.expiry_date) return false;
         const days = Math.ceil((new Date(p.expiry_date) - new Date()) / (1000 * 60 * 60 * 24));
@@ -71,7 +71,8 @@ function Notifications() {
       });
 
       // Outstanding credit
-      const credits = creditRes.data.credits || creditRes.data.sales || [];
+      const creditData = creditRes.status === 'fulfilled' ? creditRes.value.data : {};
+      const credits = creditData.credits || creditData.sales || [];
       const outstanding = credits.filter(c => !c.paid && c.payment_method === 'credit');
       if (outstanding.length > 0) {
         const total = outstanding.reduce((sum, c) => sum + (c.total_amount || c.total_price || 0), 0);
@@ -85,7 +86,7 @@ function Notifications() {
       }
 
       // Overdue invoices
-      const invoices = invoicesRes.data.invoices || [];
+      const invoices = invoicesRes.status === 'fulfilled' ? invoicesRes.value.data.invoices || [] : [];
       const overdueInvoices = invoices.filter(inv => inv.status === 'unpaid' && inv.due_date && inv.due_date < today);
       overdueInvoices.forEach(inv => {
         items.push({
@@ -98,7 +99,7 @@ function Notifications() {
       });
 
       // Overdue purchase orders
-      const pos = poRes.data.purchase_orders || [];
+      const pos = poRes.status === 'fulfilled' ? poRes.value.data.purchase_orders || [] : [];
       const overduePOs = pos.filter(po => po.status === 'sent' && po.expected_date && po.expected_date < today);
       overduePOs.forEach(po => {
         items.push({
@@ -111,7 +112,7 @@ function Notifications() {
       });
 
       // Follow-ups due
-      const followups = followupsRes.data.customers || [];
+      const followups = followupsRes.status === 'fulfilled' ? followupsRes.value.data.customers || [] : [];
       followups.forEach(c => {
         items.push({
           type: 'followup',

@@ -47,6 +47,7 @@ export default function Suppliers() {
   // ── Scorecard state ─────────────────────────────────────────────────────────
   const [scorecard, setScorecard]       = useState([]);
   const [scorecardLoading, setScorecardLoading] = useState(false);
+  const [errorScorecard, setErrorScorecard] = useState(null);
   const [expandedSupplier, setExpandedSupplier] = useState(null);
   const [deliveries, setDeliveries]     = useState([]);
   const [deliveriesLoading, setDeliveriesLoading] = useState(false);
@@ -59,6 +60,7 @@ export default function Suppliers() {
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [priceHistory, setPriceHistory]   = useState([]);
   const [priceLoading, setPriceLoading]   = useState(false);
+  const [errorPriceHistory, setErrorPriceHistory] = useState(null);
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [priceForm, setPriceForm]         = useState({ supplier_id: '', product_id: '', product_name: '', unit_cost: '', recorded_date: todayStr(), notes: '' });
   const [products, setProducts]           = useState([]);
@@ -122,10 +124,14 @@ export default function Suppliers() {
 
   const fetchScorecard = async () => {
     setScorecardLoading(true);
+    setErrorScorecard(null);
     try {
       const res = await axios.get(`${BACKEND_URL}/suppliers/${storeId}/scorecard`);
       setScorecard(res.data.scorecard || []);
-    } catch (err) { console.error('Error fetching scorecard:', err); }
+    } catch (err) {
+      console.error('Error fetching scorecard:', err);
+      setErrorScorecard('Failed to load scorecard. Please try again.');
+    }
     setScorecardLoading(false);
   };
 
@@ -176,10 +182,14 @@ export default function Suppliers() {
   const fetchPriceHistory = async (supplierId) => {
     if (!supplierId) { setPriceHistory([]); return; }
     setPriceLoading(true);
+    setErrorPriceHistory(null);
     try {
       const res = await axios.get(`${BACKEND_URL}/supplier-price-history/${supplierId}`);
       setPriceHistory(res.data.history || []);
-    } catch (err) { console.error('Error fetching price history:', err); }
+    } catch (err) {
+      console.error('Error fetching price history:', err);
+      setErrorPriceHistory('Failed to load price history. Please try again.');
+    }
     setPriceLoading(false);
   };
 
@@ -210,10 +220,13 @@ export default function Suppliers() {
 
   // Build price trend per product from history
   const priceByProduct = priceHistory.reduce((acc, entry) => {
-    if (!acc[entry.product_name]) acc[entry.product_name] = [];
-    acc[entry.product_name].push(entry);
+    const key = entry.product_id || entry.product_name;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(entry);
     return acc;
   }, {});
+
+  const allSuppliersZero = scorecard.length > 0 && scorecard.every(s => s.totalOrders === 0);
 
   const tabStyle = (t) => ({
     padding: '9px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
@@ -386,10 +399,13 @@ export default function Suppliers() {
         {tab === 'scorecard' && isOwner && (
           <>
             {scorecardLoading && <div className="empty-txt">Loading scorecard...</div>}
-            {!scorecardLoading && scorecard.length === 0 && (
+            {!scorecardLoading && errorScorecard && (
+              <div className="error-msg">{errorScorecard}</div>
+            )}
+            {!scorecardLoading && !errorScorecard && scorecard.length === 0 && (
               <div className="empty-txt">No suppliers to score yet. Add suppliers and record purchase orders first.</div>
             )}
-            {!scorecardLoading && scorecard.length > 0 && (
+            {!scorecardLoading && !errorScorecard && scorecard.length > 0 && (
               <div className="table-wrap">
                 <table className="sc-table">
                   <thead>
@@ -404,9 +420,19 @@ export default function Suppliers() {
                     </tr>
                   </thead>
                   <tbody>
-                    {scorecard.map(s => (
+                    {allSuppliersZero ? (
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: 'rgba(255,255,255,0.35)', fontSize: '13px' }}>
+                          No purchase order data yet. Create and receive purchase orders to see supplier performance.
+                        </td>
+                      </tr>
+                    ) : scorecard.map(s => (
                       <React.Fragment key={s.id}>
-                        <tr onClick={() => expandSupplier(s.id)}>
+                        <tr
+                          onClick={() => expandSupplier(s.id)}
+                          style={s.totalOrders === 0 ? { opacity: 0.5 } : {}}
+                          title={s.totalOrders === 0 ? 'No orders recorded for this supplier' : undefined}
+                        >
                           <td style={{ fontWeight: 600, color: 'white' }}>{s.name}</td>
                           <td>{s.totalOrders}</td>
                           <td>{s.onTimeRate !== null ? `${s.onTimeRate}%` : '—'}</td>
@@ -485,11 +511,14 @@ export default function Suppliers() {
 
             {!selectedSupplierId && <div className="empty-txt">Select a supplier to view price history.</div>}
             {selectedSupplierId && priceLoading && <div className="empty-txt">Loading...</div>}
-            {selectedSupplierId && !priceLoading && priceHistory.length === 0 && (
+            {selectedSupplierId && !priceLoading && errorPriceHistory && (
+              <div className="error-msg">{errorPriceHistory}</div>
+            )}
+            {selectedSupplierId && !priceLoading && !errorPriceHistory && priceHistory.length === 0 && (
               <div className="empty-txt">No price history logged for this supplier yet.</div>
             )}
 
-            {selectedSupplierId && !priceLoading && priceHistory.length > 0 && (
+            {selectedSupplierId && !priceLoading && !errorPriceHistory && priceHistory.length > 0 && (
               <div className="table-wrap">
                 <table className="sc-table">
                   <thead>
@@ -503,7 +532,7 @@ export default function Suppliers() {
                   </thead>
                   <tbody>
                     {priceHistory.map((entry) => {
-                      const productEntries = priceByProduct[entry.product_name] || [];
+                      const productEntries = priceByProduct[entry.product_id || entry.product_name] || [];
                       const entryIdx = productEntries.findIndex(e => e.id === entry.id);
                       const prev = productEntries[entryIdx + 1];
                       return (
@@ -534,7 +563,7 @@ export default function Suppliers() {
                 <label className="m-label">Linked PO (optional)</label>
                 <select className="m-select" style={{ width: '100%' }} value={deliveryForm.po_id} onChange={e => setDeliveryForm(f => ({ ...f, po_id: e.target.value }))}>
                   <option value="">No PO linked</option>
-                  {sentPOs.map(po => <option key={po.id} value={po.id}>{po.po_number} — {po.supplier_name}</option>)}
+                  {sentPOs.map(po => <option key={po.id} value={po.id}>{po.po_number}{po.expected_date ? ` (expected ${po.expected_date})` : ''}</option>)}
                 </select>
               </div>
               <div className="m-group">
