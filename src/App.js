@@ -32,6 +32,7 @@ import PurchaseOrders from './pages/PurchaseOrders';
 import Customers from './pages/Customers';
 import CustomerProfile from './pages/CustomerProfile';
 import AccountSettings from './pages/AccountSettings';
+import ETIMS from './pages/ETIMS';
 import Landing from './pages/Landing';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -102,6 +103,7 @@ function App() {
             <Route path="/purchase-orders" element={<PurchaseOrders />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/customers/:id" element={<CustomerProfile />} />
+            <Route path="/etims" element={<ETIMS />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/reorder" element={<Reorder />} />
           </Routes>

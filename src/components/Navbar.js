@@ -26,6 +26,7 @@ const NAV_GROUPS = [
       { path: '/cashflow',    label: 'Cash Flow' },
       { path: '/accounting',  label: 'Accounting' },
       { path: '/vat',         label: 'VAT' },
+      { path: '/etims',       label: 'eTIMS' },
       { path: '/invoices',         label: 'Invoices' },
       { path: '/purchase-orders', label: 'Purchase Orders' },
     ],

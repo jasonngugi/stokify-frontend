@@ -15,7 +15,11 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(grep -n \"\\\\\\\\\\\\\\\\ai-context\\\\|\\\\\\\\\\\\\\\\stock-transfers\\\\|\\\\\\\\\\\\\\\\branch-staff\\\\|\\\\\\\\\\\\\\\\payroll\\\\|\\\\\\\\\\\\\\\\sales\" \"c:\\\\Users\\\\jason\\\\Desktop\\\\inventory-app\\\\backend\\\\index.js\")"
+      "Bash(grep -n \"\\\\\\\\\\\\\\\\ai-context\\\\|\\\\\\\\\\\\\\\\stock-transfers\\\\|\\\\\\\\\\\\\\\\branch-staff\\\\|\\\\\\\\\\\\\\\\payroll\\\\|\\\\\\\\\\\\\\\\sales\" \"c:\\\\Users\\\\jason\\\\Desktop\\\\inventory-app\\\\backend\\\\index.js\")",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/suppliers/36265ff8-1750-4f6f-8ec7-4c6925e77901/scorecard)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/customers/36265ff8-1750-4f6f-8ec7-4c6925e77901/followups)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/invoices/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/purchase-orders/36265ff8-1750-4f6f-8ec7-4c6925e77901)"
     ]
   }
 }
