@@ -30,6 +30,7 @@ export default function Invoices() {
   const [showModal, setShowModal]   = useState(false);
   const [saving, setSaving]         = useState(false);
   const [saveError, setSaveError]   = useState('');
+  const [etimsToast, setEtimsToast] = useState(null);
 
   // Stored VAT rate from vat_config
   const [storeVatRate, setStoreVatRate] = useState(16);
@@ -116,7 +117,7 @@ export default function Invoices() {
     setSaving(true);
     setSaveError('');
     try {
-      await axios.post(`${BACKEND_URL}/invoices`, {
+      const invRes = await axios.post(`${BACKEND_URL}/invoices`, {
         store_id:        storeId,
         customer_name:   form.customer_name.trim(),
         customer_email:  form.customer_email.trim() || null,
@@ -130,9 +131,21 @@ export default function Invoices() {
         notes:           form.notes.trim() || null,
         items:           validItems,
       });
+      const invoiceId = invRes.data?.invoice?.id;
       setShowModal(false);
       fetchInvoices();
       fetchSummary();
+      if (invoiceId) {
+        try {
+          const etimsRes = await axios.post(`${BACKEND_URL}/etims/submit/invoice/${invoiceId}`, { store_id: storeId });
+          const sub = etimsRes.data?.submission;
+          if (sub?.cuin) setEtimsToast(`Invoice submitted to KRA. CUIN: ${sub.cuin}`);
+          else setEtimsToast('KRA submission failed. Retry from the eTIMS page.');
+        } catch {
+          setEtimsToast('KRA submission failed. Retry from the eTIMS page.');
+        }
+        setTimeout(() => setEtimsToast(null), 8000);
+      }
     } catch (err) {
       setSaveError(err.response?.data?.error || 'Failed to save invoice.');
     }
@@ -247,6 +260,11 @@ export default function Invoices() {
       `}</style>
 
       <div className="inv-page">
+        {etimsToast && (
+          <div style={{ position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)', background: etimsToast.includes('failed') ? 'rgba(255,77,77,0.95)' : 'rgba(0,245,160,0.95)', color: etimsToast.includes('failed') ? 'white' : '#0a0a14', padding: '12px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', zIndex: 999, boxShadow: '0 4px 20px rgba(0,0,0,0.3)', maxWidth: '90vw', textAlign: 'center' }}>
+            {etimsToast}
+          </div>
+        )}
         <div className="top-bar">
           <div>
             <h1 className="inv-title">Invoices</h1>

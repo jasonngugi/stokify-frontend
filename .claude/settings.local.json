@@ -19,7 +19,9 @@
       "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/suppliers/36265ff8-1750-4f6f-8ec7-4c6925e77901/scorecard)",
       "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/customers/36265ff8-1750-4f6f-8ec7-4c6925e77901/followups)",
       "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/invoices/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
-      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/purchase-orders/36265ff8-1750-4f6f-8ec7-4c6925e77901)"
+      "Bash(curl -s -w \"\\\\nSTATUS:%{http_code}\" https://stokify-backend.onrender.com/purchase-orders/36265ff8-1750-4f6f-8ec7-4c6925e77901)",
+      "Bash(curl -s -X POST https://stokify-backend.onrender.com/etims/submit/sale/00000000-0000-0000-0000-000000000000 -H \"Content-Type: application/json\" -d \"{\\\\\"store_id\\\\\":\\\\\"36265ff8-1750-4f6f-8ec7-4c6925e77901\\\\\"}\")",
+      "Bash(curl -s https://stokify-backend.onrender.com/etims/status/36265ff8-1750-4f6f-8ec7-4c6925e77901)"
     ]
   }
 }
