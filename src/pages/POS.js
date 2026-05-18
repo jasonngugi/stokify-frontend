@@ -89,7 +89,7 @@ function POS() {
     if (cart.length === 0) return;
     setLoading(true);
     try {
-      await axios.post(`${BACKEND_URL}/sales`, {
+      const saleRes = await axios.post(`${BACKEND_URL}/sales`, {
         store_id: storeId,
         payment_method: paymentMethod,
         items: cart.map(item => ({
@@ -98,12 +98,22 @@ function POS() {
           unit_price: item.product.price,
         })),
       });
-      setReceiptData({ items: [...cart], total, paymentMethod, date: new Date() });
+      const saleId = saleRes.data?.sale?.id;
+      setReceiptData({ items: [...cart], total, paymentMethod, date: new Date(), saleId, cuin: null, qrCode: null, etimsStatus: saleId ? 'submitting' : 'disabled' });
       setProducts(prev => prev.map(p => {
         const ci = cart.find(i => i.product.id === p.id);
         return ci ? { ...p, quantity: p.quantity - ci.quantity } : p;
       }));
       setShowReceipt(true);
+      if (saleId) {
+        try {
+          const etimsRes = await axios.post(`${BACKEND_URL}/etims/submit/sale/${saleId}`, { store_id: storeId });
+          const sub = etimsRes.data?.submission;
+          setReceiptData(prev => ({ ...prev, cuin: sub?.cuin || null, qrCode: sub?.qr_code_data || null, etimsStatus: sub?.status || 'failed' }));
+        } catch {
+          setReceiptData(prev => ({ ...prev, etimsStatus: 'failed' }));
+        }
+      }
     } catch (err) {
       alert('Sale failed: ' + (err.response?.data?.error || err.message));
     } finally {
@@ -139,6 +149,7 @@ function POS() {
       <div class="div"></div>
       <div class="row bold"><span>TOTAL</span><span>KSh ${receiptData.total.toLocaleString()}</span></div>
       <div class="row"><span>Payment</span><span>${receiptData.paymentMethod.toUpperCase()}</span></div>
+      ${receiptData.cuin ? `<hr style="border:none;border-top:1px dashed #ccc;margin:8px 0"/><p style="text-align:center;font-size:11px;color:#666;margin:2px 0;letter-spacing:0.8px">KRA CUIN</p><p style="text-align:center;font-size:13px;font-weight:700;font-family:monospace;letter-spacing:1px">${receiptData.cuin}</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(receiptData.qrCode || receiptData.cuin)}" style="display:block;margin:6px auto;width:90px;height:90px"/>` : ''}
       <div class="div"></div>
       <p class="center">Thank you for your business!</p>
     </body></html>`);
@@ -468,6 +479,27 @@ function POS() {
               <span>Payment method</span>
               <span style={{ textTransform: 'uppercase', fontWeight: 600 }}>{receiptData.paymentMethod}</span>
             </div>
+
+            <hr className="pos-modal-divider" />
+            {receiptData.etimsStatus === 'submitting' && (
+              <div style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(0,0,0,0.45)', padding: '8px 0' }}>
+                Submitting to KRA...
+              </div>
+            )}
+            {receiptData.etimsStatus === 'submitted' && receiptData.cuin && (
+              <div style={{ textAlign: 'center', padding: '8px 0' }}>
+                <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.45)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>KRA CUIN</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, fontFamily: 'monospace', letterSpacing: '1px', color: '#0a0a14' }}>{receiptData.cuin}</div>
+                {receiptData.qrCode && (
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(receiptData.qrCode)}`} alt="KRA QR" style={{ marginTop: '8px', width: '90px', height: '90px' }} />
+                )}
+              </div>
+            )}
+            {receiptData.etimsStatus === 'failed' && (
+              <div style={{ textAlign: 'center', fontSize: '12px', color: '#cc0000', padding: '8px 0' }}>
+                KRA submission failed. Resubmit from eTIMS page.
+              </div>
+            )}
 
             <div className="pos-modal-btns">
               <button className="pos-modal-btn-print" onClick={handlePrint}>🖨 Print Receipt</button>
